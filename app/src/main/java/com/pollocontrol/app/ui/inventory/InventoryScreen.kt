@@ -1,0 +1,133 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
+package com.pollocontrol.app.ui.inventory
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.ui.components.PolloBottomNavBar
+import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.data.local.entity.SupplyEntity
+
+@Composable
+fun InventoryScreen(
+    app: PolloControlApp,
+    navController: NavHostController,
+    onNavigateToForm: (Long) -> Unit
+) {
+    val viewModel: InventoryViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T = InventoryViewModel(app) as T
+        }
+    )
+    val insumos by viewModel.filteredSupplies.collectAsState()
+    val bajoStock by viewModel.lowStockSupplies.collectAsState()
+    var filter by remember { mutableStateOf("TODOS") }
+    var searchQuery by remember { mutableStateOf("") }
+    val tipos = listOf("TODOS", "ALIMENTO", "MEDICAMENTO", "VITAMINA", "VACUNA", "DESINFECTANTE", "GAS", "CAMA", "EMPAQUE", "OTRO")
+
+    val filteredAndSearched = remember(insumos, searchQuery) {
+        if (searchQuery.isBlank()) insumos
+        else insumos.filter {
+            it.nombre.contains(searchQuery, ignoreCase = true) ||
+            it.tipo.contains(searchQuery, ignoreCase = true) ||
+            it.unidad.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
+    Scaffold(
+        bottomBar = { PolloBottomNavBar(navController) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Inventario") },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary)
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
+        }
+    ) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            if (bajoStock.isNotEmpty()) {
+                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)), modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Warning, "Alerta", tint = Color(0xFFEF6C00))
+                        Spacer(Modifier.width(8.dp))
+                        Text("${bajoStock.size} insumos con stock bajo", fontWeight = FontWeight.Bold, color = Color(0xFFEF6C00))
+                    }
+                }
+            }
+
+            Row(Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tipos.forEach { t ->
+                    FilterChip(selected = filter == t, onClick = { filter = t; viewModel.setFilter(t) }, label = { Text(t.lowercase().replaceFirstChar { it.uppercase() }) })
+                }
+            }
+
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Buscar por nombre, tipo o unidad...") },
+                leadingIcon = { Icon(Icons.Default.Search, "Buscar") },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) { Icon(Icons.Default.Clear, "Limpiar") }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                singleLine = true
+            )
+
+            if (filteredAndSearched.isEmpty()) {
+                PolloEmptyState(
+                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay insumos registrados",
+                    subtitle = if (searchQuery.isNotBlank()) "Intente con otros terminos" else "Agregue un insumo usando el boton +"
+                )
+            } else {
+                LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(filteredAndSearched, key = { it.id }) { insumo ->
+                        InsumoCard(insumo, onClick = { onNavigateToForm(insumo.id) })
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InsumoCard(insumo: SupplyEntity, onClick: () -> Unit) {
+    val isLow = insumo.stockActual <= insumo.stockMinimo
+    Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
+        Row(Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(insumo.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text(insumo.tipo.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(4.dp))
+                Text("Stock: ${insumo.stockActual} ${insumo.unidad}", style = MaterialTheme.typography.bodyMedium)
+                Text("Minimo: ${insumo.stockMinimo} ${insumo.unidad}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            if (isLow) {
+                Icon(Icons.Default.Warning, "Stock bajo", tint = Color(0xFFEF6C00))
+            }
+        }
+    }
+}

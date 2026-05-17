@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PolloControl</string>
+    <string name="google_web_client_id">279690227214-d9k0qtqj3ms40jie45vhmj7a2ebmgd60.apps.googleusercontent.com</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="lotes">Lotes</string>
+    <string name="inventario">Inventario</string>
+    <string name="alimentacion">Alimentación</string>
+    <string name="gastos">Gastos</string>
+    <string name="sanidad">Sanidad</string>
+    <string name="pesajes">Pesajes</string>
+    <string name="sacrificio">Sacrificio</string>
+    <string name="ventas">Ventas</string>
+    <string name="clientes">Clientes</string>
+    <string name="reportes">Reportes</string>
+    <string name="configuracion">Configuración</string>
+    <string name="agregar">Agregar</string>
+    <string name="editar">Editar</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="guardar">Guardar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="buscar">Buscar</string>
+    <string name="total">Total</string>
+    <string name="activo">Activo</string>
+    <string name="finalizado">Finalizado</string>
+    <string name="vendido">Vendido</string>
+    <string name="sacrificado">Sacrificado</string>
+    <string name="pollos_vivos">Pollos Vivos</string>
+    <string name="mortalidad">Mortalidad</string>
+    <string name="costo_pollo">Costo por Pollo</string>
+    <string name="costo_kilo">Costo por Kilo</string>
+    <string name="ganancia_estimada">Ganancia Estimada</string>
+    <string name="ventas_hoy">Ventas Hoy</string>
+    <string name="ventas_semana">Ventas Semana</string>
+    <string name="ventas_mes">Ventas Mes</string>
+    <string name="sin_datos">Sin datos disponibles</string>
+    <string name="error_cargar_datos">Error al cargar datos</string>
+    <string name="operacion_exitosa">Operación exitosa</string>
+    <string name="error_guardar">Error al guardar</string>
+    <string name="confirmar_eliminar">¿Está seguro de eliminar?</string>
+    <string name="si">Sí</string>
+    <string name="no">No</string>
+</resources>
