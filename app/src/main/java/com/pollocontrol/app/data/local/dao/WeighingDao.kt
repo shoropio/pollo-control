@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WeighingDao {
+    @Query("SELECT * FROM pesajes ORDER BY fecha DESC")
+    fun getAll(): Flow<List<WeighingEntity>>
+
     @Query("SELECT * FROM pesajes WHERE loteId = :batchId ORDER BY fecha DESC")
     fun getByBatch(batchId: Long): Flow<List<WeighingEntity>>
 
@@ -23,4 +26,7 @@ interface WeighingDao {
 
     @Delete
     suspend fun delete(weighing: WeighingEntity)
+
+    @Query("DELETE FROM pesajes WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

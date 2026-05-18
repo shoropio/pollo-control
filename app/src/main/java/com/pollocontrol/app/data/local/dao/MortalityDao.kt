@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MortalityDao {
+    @Query("SELECT * FROM mortalidad ORDER BY fecha DESC")
+    fun getAll(): Flow<List<MortalityEntity>>
+
     @Query("SELECT * FROM mortalidad WHERE loteId = :batchId ORDER BY fecha DESC")
     fun getByBatch(batchId: Long): Flow<List<MortalityEntity>>
 
@@ -23,4 +26,7 @@ interface MortalityDao {
 
     @Delete
     suspend fun delete(mortality: MortalityEntity)
+
+    @Query("DELETE FROM mortalidad WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

@@ -21,9 +21,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.TreatmentEntity
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.ui.components.ConfirmDialog
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -46,6 +48,7 @@ fun HealthScreen(
 
     val lote by viewModel.batch.collectAsState()
     val treatments by viewModel.treatments.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
     var editingRecord by remember { mutableStateOf<TreatmentEntity?>(null) }
     var showDeleteConfirm by remember { mutableStateOf<TreatmentEntity?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -106,7 +109,7 @@ fun HealthScreen(
                                 Spacer(Modifier.height(4.dp))
                                 Text("Dosis: ${t.dosis.ifBlank { "-" }} | Responsable: ${t.responsable.ifBlank { "-" }}")
                                 Text("Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(t.fechaAplicacion))}")
-                                if (t.costo != null) Text("Costo: $${String.format("%.2f", t.costo)}")
+                                if (t.costo != null) Text("Costo: ${formatMoney(t.costo, currency)}")
                                 if (t.periodoRetiro != null) {
                                     val retiroDate = t.fechaAplicacion + (t.periodoRetiro * 86400000L)
                                     val enRetiro = retiroDate > System.currentTimeMillis()
@@ -124,6 +127,7 @@ fun HealthScreen(
         HealthFormDialog(
             loteId = batchId,
             initial = if (record.id == 0L) null else record,
+            currency = currency,
             onSave = { viewModel.save(it) { editingRecord = null } },
             onDismiss = { editingRecord = null }
         )
@@ -136,7 +140,7 @@ fun HealthScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HealthFormDialog(loteId: Long, initial: TreatmentEntity? = null, onSave: (TreatmentEntity) -> Unit, onDismiss: () -> Unit) {
+private fun HealthFormDialog(loteId: Long, initial: TreatmentEntity? = null, currency: AppCurrency, onSave: (TreatmentEntity) -> Unit, onDismiss: () -> Unit) {
     val isEditing = initial != null
     var tipo by remember { mutableStateOf(initial?.tipo ?: "MEDICAMENTO") }
     var nombre by remember { mutableStateOf(initial?.nombre ?: "") }
@@ -165,7 +169,7 @@ private fun HealthFormDialog(loteId: Long, initial: TreatmentEntity? = null, onS
                 OutlinedTextField(value = nombre, onValueChange = { nombre = it; nombreError = false }, label = { Text("Nombre *") }, isError = nombreError, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = dosis, onValueChange = { dosis = it }, label = { Text("Dosis") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = responsable, onValueChange = { responsable = it }, label = { Text("Responsable") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(value = costo, onValueChange = { costo = it }, label = { Text("Costo $") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = costo, onValueChange = { costo = it }, label = { Text("Costo") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
                 OutlinedTextField(value = periodoRetiro, onValueChange = { periodoRetiro = it }, label = { Text("Periodo de Retiro (dias)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fecha)), onValueChange = {}, label = { Text("Fecha Aplicacion") }, readOnly = true, modifier = Modifier.fillMaxWidth(), trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Fecha") } })
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)

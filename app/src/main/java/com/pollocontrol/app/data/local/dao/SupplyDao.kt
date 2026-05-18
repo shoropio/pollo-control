@@ -27,6 +27,9 @@ interface SupplyDao {
     @Delete
     suspend fun delete(supply: SupplyEntity)
 
+    @Query("DELETE FROM insumos WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("UPDATE insumos SET stockActual = stockActual + :amount WHERE id = :id")
     suspend fun addStock(id: Long, amount: Double)
 

@@ -2,7 +2,6 @@ package com.pollocontrol.app.ui.dashboard
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -22,6 +21,8 @@ import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.KpiCard
 import com.pollocontrol.app.ui.components.MiniLineChart
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
+import com.pollocontrol.app.ui.components.PullToSyncBox
+import com.pollocontrol.app.ui.settings.formatMoney
 import com.pollocontrol.app.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,6 +47,7 @@ fun DashboardScreen(
     )
     val stats by viewModel.stats.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     Scaffold(
         bottomBar = { PolloBottomNavBar(navController) },
@@ -66,14 +68,20 @@ fun DashboardScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+        PullToSyncBox(
+            onSync = {
+                app.firebaseSyncManager.syncAll()
+                viewModel.loadDashboard(forceRefresh = true)
+            },
+            modifier = Modifier.padding(padding)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
             // Header
             Text(
                 text = "Buenos dias",
@@ -92,7 +100,6 @@ fun DashboardScreen(
                 repeat(4) {
                     Card(
                         modifier = Modifier.fillMaxWidth().height(80.dp),
-                        shape = RoundedCornerShape(8.dp),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                     ) {}
                 }
@@ -104,9 +111,9 @@ fun DashboardScreen(
                     KpiCard("Mort.", stats.totalMortality.toString(), Icons.Default.Warning, StatusNegative, Modifier.weight(1f))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    KpiCard("Ventas", "$${String.format("%.0f", stats.totalSales)}", Icons.Default.ShoppingCart, StatusInfo, Modifier.weight(1f))
-                    KpiCard("Gastos", "$${String.format("%.0f", stats.totalExpenses)}", Icons.Default.AttachMoney, StatusWarning, Modifier.weight(1f))
-                    KpiCard("Ganancia", "$${String.format("%.0f", stats.estimatedProfit)}", Icons.Default.AccountBalance, if (stats.estimatedProfit >= 0) StatusPositive else StatusNegative, Modifier.weight(1f))
+                    KpiCard("Ventas", formatMoney(stats.totalSales, currency, decimals = 0), Icons.Default.ShoppingCart, StatusInfo, Modifier.weight(1f))
+                    KpiCard("Gastos", formatMoney(stats.totalExpenses, currency, decimals = 0), Icons.Default.AttachMoney, StatusWarning, Modifier.weight(1f))
+                    KpiCard("Ganancia", formatMoney(stats.estimatedProfit, currency, decimals = 0), Icons.Default.AccountBalance, if (stats.estimatedProfit >= 0) StatusPositive else StatusNegative, Modifier.weight(1f))
                 }
 
                 // Chart
@@ -152,6 +159,7 @@ fun DashboardScreen(
                         AlertCard("${stats.pendingPayments} pagos pendientes", StatusInfo, Icons.Default.Payment)
                 }
             }
+            }
         }
     }
 }
@@ -167,7 +175,6 @@ private fun QuickActionCard(
     Card(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
@@ -191,7 +198,6 @@ private fun QuickActionCard(
 private fun AlertCard(message: String, color: Color, icon: ImageVector) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
         Row(

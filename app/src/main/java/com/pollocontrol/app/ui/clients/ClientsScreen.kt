@@ -21,7 +21,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.ClientEntity
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.settings.formatMoney
 
 @Composable
 fun ClientsScreen(
@@ -36,6 +38,7 @@ fun ClientsScreen(
         }
     )
     val searchResults by viewModel.searchResults.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
     var query by remember { mutableStateOf("") }
 
     Scaffold(
@@ -70,7 +73,7 @@ fun ClientsScreen(
             } else {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(searchResults, key = { it.id }) { cliente ->
-                        ClienteCard(cliente, onClick = { onNavigateToForm(cliente.id) })
+                        ClienteCard(cliente, currency, onClick = { onNavigateToForm(cliente.id) })
                     }
                 }
             }
@@ -79,7 +82,7 @@ fun ClientsScreen(
 }
 
 @Composable
-private fun ClienteCard(cliente: ClientEntity, onClick: () -> Unit) {
+private fun ClienteCard(cliente: ClientEntity, currency: AppCurrency, onClick: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -98,7 +101,7 @@ private fun ClienteCard(cliente: ClientEntity, onClick: () -> Unit) {
             if (cliente.saldoPendiente > 0) {
                 Column(horizontalAlignment = Alignment.End) {
                     Text("Saldo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("$${String.format("%.2f", cliente.saldoPendiente)}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
+                    Text(formatMoney(cliente.saldoPendiente, currency), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color(0xFFD32F2F))
                 }
             }
         }

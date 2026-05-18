@@ -51,6 +51,7 @@ fun BatchFormScreen(
     var cantidadError by remember { mutableStateOf(false) }
     var precioError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(isEditing) }
+    val currency by app.settingsManager.currency.collectAsState()
 
     LaunchedEffect(batchId) {
         if (isEditing) {
@@ -95,7 +96,7 @@ fun BatchFormScreen(
 
                 OutlinedTextField(value = cantidadInicial, onValueChange = { cantidadInicial = it; cantidadError = false }, label = { Text("Cantidad Inicial *") }, isError = cantidadError, supportingText = if (cantidadError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text("Precio por Pollito *") }, isError = precioError, supportingText = if (precioError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text("$") })
+                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text("Precio por Pollito *") }, isError = precioError, supportingText = if (precioError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
                 OutlinedTextField(value = raza, onValueChange = { raza = it }, label = { Text("Raza / Línea Genética") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 

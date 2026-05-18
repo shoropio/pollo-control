@@ -35,6 +35,7 @@ fun ExpenseFormScreen(
     )
     val isEditing = gastoId != 0L
     val batchMap by viewModel.batchMap.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     var descripcion by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("OTRO") }
@@ -85,7 +86,7 @@ fun ExpenseFormScreen(
                     }
                 }
 
-                OutlinedTextField(value = monto, onValueChange = { monto = it; montoError = false }, label = { Text("Monto *") }, isError = montoError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text("$") })
+                OutlinedTextField(value = monto, onValueChange = { monto = it; montoError = false }, label = { Text("Monto *") }, isError = montoError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
                 val dateStr = remember(fecha) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fecha)) }
                 OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text("Fecha") }, readOnly = true, modifier = Modifier.fillMaxWidth(), trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Fecha") } })

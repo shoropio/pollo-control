@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FeedingDao {
+    @Query("SELECT * FROM alimentacion ORDER BY fecha DESC")
+    fun getAll(): Flow<List<FeedingEntity>>
+
     @Query("SELECT * FROM alimentacion WHERE loteId = :batchId ORDER BY fecha DESC")
     fun getByBatch(batchId: Long): Flow<List<FeedingEntity>>
 
@@ -23,4 +26,7 @@ interface FeedingDao {
 
     @Delete
     suspend fun delete(feeding: FeedingEntity)
+
+    @Query("DELETE FROM alimentacion WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

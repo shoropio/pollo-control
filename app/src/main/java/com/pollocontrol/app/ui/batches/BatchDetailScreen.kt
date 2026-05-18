@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.mortality.MortalityViewModel
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -61,6 +62,7 @@ fun BatchDetailScreen(
     }
 
     val mortalidadTotal by mortalityVM.totalMortality.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
     val pollosVivos = (batch?.cantidadInicial ?: 0) - mortalidadTotal
     val edad = if ((batch?.fechaIngreso ?: 0) > 0) ((System.currentTimeMillis() - (batch?.fechaIngreso ?: 0)) / (1000 * 60 * 60 * 24)).toInt() else 0
     val date = remember(batch) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(batch?.fechaIngreso ?: 0)) }
@@ -96,7 +98,7 @@ fun BatchDetailScreen(
                     DetailRow("Pollos Iniciales", "${batch?.cantidadInicial ?: 0}")
                     DetailRow("Mortalidad", "$mortalidadTotal")
                     DetailRow("Pollos Vivos", "$pollosVivos", if (pollosVivos > 0) Color(0xFF388E3C) else Color(0xFFD32F2F))
-                    DetailRow("Costo/Pollito", "$${String.format("%.2f", batch?.precioPorPollito ?: 0.0)}")
+                    DetailRow("Costo/Pollito", formatMoney(batch?.precioPorPollito ?: 0.0, currency))
                 }}
 
                 Text("Gestión del Lote", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

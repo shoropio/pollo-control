@@ -27,6 +27,7 @@ import com.pollocontrol.app.ui.sales.SaleFormScreen
 import com.pollocontrol.app.ui.clients.ClientsScreen
 import com.pollocontrol.app.ui.clients.ClientFormScreen
 import com.pollocontrol.app.ui.reports.ReportsScreen
+import com.pollocontrol.app.ui.settings.SettingsScreen
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.mortality.MortalityScreen
 import com.pollocontrol.app.ui.navigation.MoreScreen
@@ -209,7 +210,17 @@ fun PolloControlNavGraph(
                 onNavigateToClients = { navController.navigate(Screen.Clients.route) },
                 onNavigateToReports = { navController.navigate(Screen.Reports.route) },
                 onNavigateToBackupRestore = { navController.navigate(Screen.BackupRestore.route) },
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onSync = { app.firebaseSyncManager.syncAll() },
                 currentUser = app.authManager.currentUser.value,
+                onSignOut = { scope.launch { app.authManager.signOut() } }
+            )
+        }
+
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                app = app,
+                onNavigateBack = { navController.popBackStack() },
                 onSignOut = { scope.launch { app.authManager.signOut() } }
             )
         }

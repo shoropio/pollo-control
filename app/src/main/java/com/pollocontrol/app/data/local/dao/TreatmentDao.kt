@@ -23,4 +23,7 @@ interface TreatmentDao {
 
     @Delete
     suspend fun delete(treatment: TreatmentEntity)
+
+    @Query("DELETE FROM tratamientos WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

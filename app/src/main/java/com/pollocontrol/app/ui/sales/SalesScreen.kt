@@ -21,7 +21,9 @@ import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.ConfirmDialog
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.data.local.entity.SaleEntity
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,6 +43,7 @@ fun SalesScreen(
     val sales by viewModel.sales.collectAsState()
     val totalSales by viewModel.totalSales.collectAsState()
     val batches by viewModel.batches.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     val filteredSales = remember(sales, searchQuery) {
@@ -58,18 +61,25 @@ fun SalesScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Ventas") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        PullToSyncBox(
+            onSync = { app.firebaseSyncManager.syncAll() },
+            modifier = Modifier.padding(padding)
+        ) {
+            Column(Modifier.fillMaxSize()) {
             Card(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Total Ventas", style = MaterialTheme.typography.bodySmall)
-                    Text("$${String.format("%.2f", totalSales)}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Text(formatMoney(totalSales, currency), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                     Text("${filteredSales.size} registros", style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -110,7 +120,7 @@ fun SalesScreen(
                                     }
                                 }
                                 Column(horizontalAlignment = Alignment.End) {
-                                    Text("$${String.format("%.2f", venta.total)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                    Text(formatMoney(venta.total, currency), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                                     IconButton(onClick = { showDeleteConfirm = venta }) {
                                         Icon(Icons.Default.Delete, "Eliminar", tint = MaterialTheme.colorScheme.error)
                                     }
@@ -119,6 +129,7 @@ fun SalesScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

@@ -10,7 +10,11 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 import com.pollocontrol.app.R
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +43,15 @@ class AuthManager(private val context: Context) {
             requestGoogleCredential(activity, webClientId, filterAuthorizedAccounts = true)
         } catch (e: GetCredentialException) {
             requestGoogleCredential(activity, webClientId, filterAuthorizedAccounts = false)
+        }.let { credential ->
+            signInWithFirebaseIfAvailable(credential.idToken)
+
+            AuthUser(
+                id = currentFirebaseUid() ?: credential.id,
+                email = credential.email,
+                displayName = credential.displayName,
+                photoUrl = credential.photoUrl
+            )
         }.also { user ->
             saveUser(user)
             _currentUser.value = user
@@ -48,6 +61,9 @@ class AuthManager(private val context: Context) {
     suspend fun signOut() {
         prefs.edit().clear().apply()
         _currentUser.value = null
+        if (FirebaseApp.getApps(context).isNotEmpty()) {
+            FirebaseAuth.getInstance().signOut()
+        }
         runCatching {
             credentialManager.clearCredentialState(ClearCredentialStateRequest())
         }
@@ -57,7 +73,7 @@ class AuthManager(private val context: Context) {
         activity: Activity,
         webClientId: String,
         filterAuthorizedAccounts: Boolean
-    ): AuthUser {
+    ): GoogleCredentialData {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setServerClientId(webClientId)
             .setFilterByAuthorizedAccounts(filterAuthorizedAccounts)
@@ -85,12 +101,25 @@ class AuthManager(private val context: Context) {
             throw IllegalStateException("No se pudo leer la cuenta de Google.", e)
         }
 
-        return AuthUser(
+        return GoogleCredentialData(
             id = googleCredential.id,
             email = googleCredential.email ?: googleCredential.id,
             displayName = googleCredential.displayName ?: googleCredential.id,
-            photoUrl = googleCredential.profilePictureUri?.toString()
+            photoUrl = googleCredential.profilePictureUri?.toString(),
+            idToken = googleCredential.idToken
         )
+    }
+
+    private suspend fun signInWithFirebaseIfAvailable(idToken: String) {
+        if (FirebaseApp.getApps(context).isEmpty()) return
+
+        val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+        FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).await()
+    }
+
+    private fun currentFirebaseUid(): String? {
+        if (FirebaseApp.getApps(context).isEmpty()) return null
+        return FirebaseAuth.getInstance().currentUser?.uid
     }
 
     private fun loadUser(): AuthUser? {
@@ -117,3 +146,11 @@ class AuthManager(private val context: Context) {
         private const val KEY_PHOTO = "photo"
     }
 }
+
+private data class GoogleCredentialData(
+    val id: String,
+    val email: String,
+    val displayName: String,
+    val photoUrl: String?,
+    val idToken: String
+)

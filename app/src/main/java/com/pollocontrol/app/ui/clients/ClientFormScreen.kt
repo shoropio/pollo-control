@@ -22,6 +22,7 @@ import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.ClientEntity
 import com.pollocontrol.app.data.local.entity.SaleEntity
 import com.pollocontrol.app.ui.components.ConfirmDialog
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 @Composable
@@ -38,6 +39,7 @@ fun ClientFormScreen(
     )
     val isEditing = clienteId != 0L
     val clientSales by viewModel.clientSales.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
@@ -77,7 +79,7 @@ fun ClientFormScreen(
                 OutlinedTextField(value = nombre, onValueChange = { nombre = it; nombreError = false }, label = { Text("Nombre *") }, isError = nombreError, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = telefono, onValueChange = { telefono = it }, label = { Text("Teléfono") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = direccion, onValueChange = { direccion = it }, label = { Text("Dirección") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(value = saldoPendiente, onValueChange = { saldoPendiente = it }, label = { Text("Saldo Pendiente \$") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = saldoPendiente, onValueChange = { saldoPendiente = it }, label = { Text("Saldo Pendiente") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
@@ -120,7 +122,7 @@ fun ClientFormScreen(
                         clientSales.forEach { venta ->
                             Card(Modifier.fillMaxWidth()) {
                                 Column(Modifier.padding(12.dp)) {
-                                    Text("${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(venta.fecha))} - $${String.format("%.2f", venta.total)}", style = MaterialTheme.typography.bodyMedium)
+                                    Text("${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(venta.fecha))} - ${formatMoney(venta.total, currency)}", style = MaterialTheme.typography.bodyMedium)
                                     Text("${String.format("%.2f", venta.cantidad)} ${if (venta.modalidad == "KILO") "kg" else "unid"} - ${venta.estadoPago}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }

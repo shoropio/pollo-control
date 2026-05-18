@@ -20,7 +20,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.domain.model.BatchReport
+import com.pollocontrol.app.ui.settings.formatMoney
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +38,7 @@ fun ReportsScreen(
     )
     val reports by viewModel.reports.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
     val context = LocalContext.current
 
     var exportMessage by remember { mutableStateOf<String?>(null) }
@@ -141,7 +144,7 @@ fun ReportsScreen(
             } else if (reports.isNotEmpty()) {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     items(reports) { report ->
-                        ReportCard(report)
+                        ReportCard(report, currency)
                     }
                 }
             }
@@ -150,7 +153,7 @@ fun ReportsScreen(
 }
 
 @Composable
-private fun ReportCard(report: BatchReport) {
+private fun ReportCard(report: BatchReport, currency: AppCurrency) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text(report.batchName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -168,13 +171,13 @@ private fun ReportCard(report: BatchReport) {
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column { Text("Costo Total", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("$${"%.2f".format(report.totalCost)}", style = MaterialTheme.typography.bodyMedium) }
-                Column(horizontalAlignment = Alignment.End) { Text("Ventas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("$${"%.2f".format(report.totalSales)}", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF1976D2)) }
+                Column { Text("Costo Total", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(formatMoney(report.totalCost, currency), style = MaterialTheme.typography.bodyMedium) }
+                Column(horizontalAlignment = Alignment.End) { Text("Ventas", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(formatMoney(report.totalSales, currency), style = MaterialTheme.typography.bodyMedium, color = Color(0xFF1976D2)) }
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column { Text("Costo/Pollo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("$${"%.2f".format(report.costPerChicken)}", style = MaterialTheme.typography.bodyMedium) }
-                Column(horizontalAlignment = Alignment.End) { Text("Costo/Kilo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("$${"%.2f".format(report.costPerKilo)}", style = MaterialTheme.typography.bodyMedium) }
+                Column { Text("Costo/Pollo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(formatMoney(report.costPerChicken, currency), style = MaterialTheme.typography.bodyMedium) }
+                Column(horizontalAlignment = Alignment.End) { Text("Costo/Kilo", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(formatMoney(report.costPerKilo, currency), style = MaterialTheme.typography.bodyMedium) }
             }
 
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -184,7 +187,7 @@ private fun ReportCard(report: BatchReport) {
 
             HorizontalDivider()
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Column { Text("Utilidad", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("$${"%.2f".format(report.profit)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (report.profit >= 0) Color(0xFF388E3C) else Color(0xFFD32F2F)) }
+                Column { Text("Utilidad", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text(formatMoney(report.profit, currency), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (report.profit >= 0) Color(0xFF388E3C) else Color(0xFFD32F2F)) }
                 Column(horizontalAlignment = Alignment.End) { Text("Rentabilidad", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant); Text("${"%.1f".format(report.profitability)}%", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (report.profitability >= 0) Color(0xFF388E3C) else Color(0xFFD32F2F)) }
             }
         }

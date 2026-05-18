@@ -26,4 +26,7 @@ interface ClientDao {
 
     @Delete
     suspend fun delete(client: ClientEntity)
+
+    @Query("DELETE FROM clientes WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

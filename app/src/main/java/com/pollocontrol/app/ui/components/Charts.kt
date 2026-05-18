@@ -5,14 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -34,7 +32,6 @@ fun MiniLineChart(
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -117,7 +114,6 @@ fun MiniBarChart(
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -145,11 +141,10 @@ fun MiniBarChart(
                     val x = padding + i * (barWidth + gap)
                     val y = padding + chartHeight - barHeight
 
-                    drawRoundRect(
+                    drawRect(
                         color = barColor.copy(alpha = 0.7f),
                         topLeft = Offset(x, y),
-                        size = Size(barWidth, barHeight),
-                        cornerRadius = CornerRadius(3.dp.toPx(), 3.dp.toPx())
+                        size = Size(barWidth, barHeight)
                     )
                 }
             }

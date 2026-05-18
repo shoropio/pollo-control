@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import java.text.SimpleDateFormat
 import java.util.*
@@ -61,7 +62,7 @@ fun BatchesScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Lotes") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
@@ -70,7 +71,11 @@ fun BatchesScreen(
             }
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        PullToSyncBox(
+            onSync = { app.firebaseSyncManager.syncAll() },
+            modifier = Modifier.padding(padding)
+        ) {
+            Column(Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -109,6 +114,7 @@ fun BatchesScreen(
             BatchCard(batch, onClick = { onNavigateToDetail(batch.id) })
                     }
                 }
+            }
             }
         }
     }

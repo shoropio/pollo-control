@@ -70,10 +70,10 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun getCsvContent(): String {
-        return ReportExporter.exportToCsv(_reports.value)
+        return ReportExporter.exportToCsv(_reports.value, app.settingsManager.currency.value)
     }
 
     fun getPdfContent(): ByteArray {
-        return ReportExporter.exportToPdf(_reports.value)
+        return ReportExporter.exportToPdf(_reports.value, app.settingsManager.currency.value)
     }
 }

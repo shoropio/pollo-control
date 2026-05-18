@@ -25,6 +25,7 @@ import androidx.navigation.NavHostController
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.data.local.entity.SupplyEntity
 
 @Composable
@@ -59,14 +60,18 @@ fun InventoryScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Inventario") },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
         }
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        PullToSyncBox(
+            onSync = { app.firebaseSyncManager.syncAll() },
+            modifier = Modifier.padding(padding)
+        ) {
+            Column(Modifier.fillMaxSize()) {
             if (bajoStock.isNotEmpty()) {
                 Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF3E0)), modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -108,6 +113,7 @@ fun InventoryScreen(
                         InsumoCard(insumo, onClick = { onNavigateToForm(insumo.id) })
                     }
                 }
+            }
             }
         }
     }

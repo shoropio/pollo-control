@@ -19,7 +19,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,6 +40,7 @@ fun ExpensesScreen(
     val expenses by viewModel.expenses.collectAsState()
     val totalExpenses by viewModel.totalExpenses.collectAsState()
     val batchMap by viewModel.batchMap.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     val filteredExpenses = remember(expenses, searchQuery) {
@@ -64,7 +67,7 @@ fun ExpensesScreen(
             Card(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("Total Gastos", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Text("$${String.format("%.2f", totalExpenses)}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+                    Text(formatMoney(totalExpenses, currency), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
                     Text("${filteredExpenses.size} registros", style = MaterialTheme.typography.bodySmall)
                 }
             }
@@ -91,7 +94,7 @@ fun ExpensesScreen(
             } else {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredExpenses, key = { it.id }) { gasto ->
-                        GastoCard(gasto, batchMap, onClick = { onNavigateToForm(gasto.id) })
+                        GastoCard(gasto, batchMap, currency, onClick = { onNavigateToForm(gasto.id) })
                     }
                 }
             }
@@ -100,7 +103,7 @@ fun ExpensesScreen(
 }
 
 @Composable
-private fun GastoCard(gasto: ExpenseEntity, batchMap: Map<Long, String>, onClick: () -> Unit) {
+private fun GastoCard(gasto: ExpenseEntity, batchMap: Map<Long, String>, currency: AppCurrency, onClick: () -> Unit) {
     val date = remember(gasto) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(gasto.fecha)) }
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -114,7 +117,7 @@ private fun GastoCard(gasto: ExpenseEntity, batchMap: Map<Long, String>, onClick
                     Text("Gasto General", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            Text("$${String.format("%.2f", gasto.monto)}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
+            Text(formatMoney(gasto.monto, currency), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
         }
     }
 }

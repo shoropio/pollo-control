@@ -20,9 +20,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.SlaughterEntity
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.ui.components.ConfirmDialog
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
 import com.pollocontrol.app.ui.components.PolloEmptyState
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -46,6 +48,7 @@ fun SlaughterScreen(
     val lote by viewModel.batch.collectAsState()
     val records by viewModel.records.collectAsState()
     val totalSacrificados by viewModel.totalSlaughtered.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
     var editingRecord by remember { mutableStateOf<SlaughterEntity?>(null) }
     var showDeleteConfirm by remember { mutableStateOf<SlaughterEntity?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -108,7 +111,7 @@ fun SlaughterScreen(
                                 }
                                 Text("Peso vivo: ${String.format("%.3f", r.pesoVivoPromedio)} kg | Canal: ${String.format("%.3f", r.pesoCanalPromedio)} kg")
                                 Text("Merma: ${String.format("%.1f", r.merma)}%", color = MaterialTheme.colorScheme.error)
-                                if (r.costoSacrificio != null) Text("Costo: $${String.format("%.2f", r.costoSacrificio)}")
+                                if (r.costoSacrificio != null) Text("Costo: ${formatMoney(r.costoSacrificio, currency)}")
                                 Text(SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(r.fecha)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
@@ -122,6 +125,7 @@ fun SlaughterScreen(
         SlaughterFormDialog(
             loteId = batchId,
             initial = if (record.id == 0L) null else record,
+            currency = currency,
             onSave = { viewModel.save(it) { editingRecord = null } },
             onDismiss = { editingRecord = null }
         )
@@ -131,7 +135,7 @@ fun SlaughterScreen(
 }
 
 @Composable
-private fun SlaughterFormDialog(loteId: Long, initial: SlaughterEntity? = null, onSave: (SlaughterEntity) -> Unit, onDismiss: () -> Unit) {
+private fun SlaughterFormDialog(loteId: Long, initial: SlaughterEntity? = null, currency: AppCurrency, onSave: (SlaughterEntity) -> Unit, onDismiss: () -> Unit) {
     val isEditing = initial != null
     var cantidad by remember { mutableStateOf(initial?.cantidad?.toString() ?: "") }
     var pesoVivo by remember { mutableStateOf(initial?.pesoVivoPromedio?.toString() ?: "") }
@@ -150,7 +154,7 @@ private fun SlaughterFormDialog(loteId: Long, initial: SlaughterEntity? = null, 
                 OutlinedTextField(value = cantidad, onValueChange = { cantidad = it; cantError = false }, label = { Text("Cantidad *") }, isError = cantError, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = pesoVivo, onValueChange = { pesoVivo = it }, label = { Text("Peso Vivo Promedio (kg)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
                 OutlinedTextField(value = pesoCanal, onValueChange = { pesoCanal = it }, label = { Text("Peso Canal Promedio (kg)") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(value = costoSac, onValueChange = { costoSac = it }, label = { Text("Costo Sacrificio $") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = costoSac, onValueChange = { costoSac = it }, label = { Text("Costo Sacrificio") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
                 OutlinedTextField(value = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fecha)), onValueChange = {}, label = { Text("Fecha") }, readOnly = true, modifier = Modifier.fillMaxWidth(), trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Fecha") } })
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
             }

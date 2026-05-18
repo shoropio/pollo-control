@@ -42,5 +42,6 @@ sealed class Screen(val route: String, val title: String) {
     }
     data object Reports : Screen("reports", "Reportes")
     data object More : Screen("more", "Más")
+    data object Settings : Screen("settings", "Configuraciones")
     data object BackupRestore : Screen("backup_restore", "Copia de Seguridad")
 }

@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SlaughterDao {
+    @Query("SELECT * FROM sacrificios ORDER BY fecha DESC")
+    fun getAll(): Flow<List<SlaughterEntity>>
+
     @Query("SELECT * FROM sacrificios WHERE loteId = :batchId ORDER BY fecha DESC")
     fun getByBatch(batchId: Long): Flow<List<SlaughterEntity>>
 
@@ -20,4 +23,7 @@ interface SlaughterDao {
 
     @Delete
     suspend fun delete(slaughter: SlaughterEntity)
+
+    @Query("DELETE FROM sacrificios WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

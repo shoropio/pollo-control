@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.domain.model.DashboardStats
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -21,10 +22,15 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    private var lastLoadedAt = 0L
+
     init { loadDashboard() }
 
-    fun loadDashboard() {
-        viewModelScope.launch {
+    fun loadDashboard(forceRefresh: Boolean = false) {
+        val now = System.currentTimeMillis()
+        if (!forceRefresh && !_isLoading.value && now - lastLoadedAt < CACHE_WINDOW_MS) return
+
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             try {
                 val batchRepo = app.batchRepository
@@ -113,6 +119,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     averageWeight = latestWeight,
                     totalFeedConsumed = totalFeedConsumed
                 )
+                lastLoadedAt = System.currentTimeMillis()
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -128,4 +135,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         val feedConsumed: Double,
         val latestWeight: Double
     )
+
+    companion object {
+        private const val CACHE_WINDOW_MS = 30_000L
+    }
 }

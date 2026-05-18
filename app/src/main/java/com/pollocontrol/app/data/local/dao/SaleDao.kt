@@ -35,4 +35,7 @@ interface SaleDao {
 
     @Delete
     suspend fun delete(sale: SaleEntity)
+
+    @Query("DELETE FROM ventas WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

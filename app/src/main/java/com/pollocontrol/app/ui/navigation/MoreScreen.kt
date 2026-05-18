@@ -12,14 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,12 +35,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.pollocontrol.app.data.auth.AuthUser
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
+import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.ui.theme.BluePrimary
 import com.pollocontrol.app.ui.theme.CoralAccent
 import com.pollocontrol.app.ui.theme.WarningOrange
@@ -59,6 +62,8 @@ fun MoreScreen(
     onNavigateToClients: () -> Unit,
     onNavigateToReports: () -> Unit,
     onNavigateToBackupRestore: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onSync: suspend () -> Unit,
     currentUser: AuthUser?,
     onSignOut: () -> Unit
 ) {
@@ -67,6 +72,7 @@ fun MoreScreen(
         MasMenuItem("Clientes", Icons.Default.People, CoralAccent, onNavigateToClients),
         MasMenuItem("Reportes", Icons.Default.Assessment, BluePrimary, onNavigateToReports),
         MasMenuItem("Copia de Seguridad", Icons.Default.Backup, BluePrimary, onNavigateToBackupRestore),
+        MasMenuItem("Configuraciones", Icons.Default.Settings, BluePrimary, onNavigateToSettings),
     )
 
     Scaffold(
@@ -81,13 +87,17 @@ fun MoreScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        PullToSyncBox(
+            onSync = onSync,
+            modifier = Modifier.padding(padding)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
             Text(
                 text = "Módulos",
                 style = MaterialTheme.typography.titleMedium,
@@ -101,7 +111,6 @@ fun MoreScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { item.onClick() },
-                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
@@ -114,7 +123,7 @@ fun MoreScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(CircleShape)
+                                .clip(RectangleShape)
                                 .background(item.color.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -146,7 +155,6 @@ fun MoreScreen(
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
@@ -159,7 +167,7 @@ fun MoreScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(CircleShape)
+                                .clip(RectangleShape)
                                 .background(BluePrimary.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -190,7 +198,6 @@ fun MoreScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onSignOut() },
-                    shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
@@ -203,7 +210,7 @@ fun MoreScreen(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .clip(CircleShape)
+                                .clip(RectangleShape)
                                 .background(MaterialTheme.colorScheme.error.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -223,6 +230,7 @@ fun MoreScreen(
                         )
                     }
                 }
+            }
             }
         }
     }

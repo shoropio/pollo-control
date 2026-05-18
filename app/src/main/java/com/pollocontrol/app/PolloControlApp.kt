@@ -4,25 +4,27 @@ import android.app.Application
 import com.pollocontrol.app.data.auth.AuthManager
 import com.pollocontrol.app.data.local.PolloControlDatabase
 import com.pollocontrol.app.data.repository.*
+import com.pollocontrol.app.data.settings.SettingsManager
 import com.pollocontrol.app.data.sync.FirebaseSyncManager
 
 class PolloControlApp : Application() {
 
     val authManager by lazy { AuthManager(this) }
+    val settingsManager by lazy { SettingsManager(this) }
 
     val database by lazy { PolloControlDatabase.getDatabase(this) }
 
-    val batchRepository by lazy { BatchRepositoryImpl(database.batchDao()) }
-    val mortalityRepository by lazy { MortalityRepositoryImpl(database.mortalityDao()) }
-    val supplyRepository by lazy { SupplyRepositoryImpl(database.supplyDao()) }
-    val feedingRepository by lazy { FeedingRepositoryImpl(database.feedingDao()) }
-    val expenseRepository by lazy { ExpenseRepositoryImpl(database.expenseDao()) }
-    val treatmentRepository by lazy { TreatmentRepositoryImpl(database.treatmentDao()) }
-    val weighingRepository by lazy { WeighingRepositoryImpl(database.weighingDao()) }
-    val slaughterRepository by lazy { SlaughterRepositoryImpl(database.slaughterDao()) }
-    val saleRepository by lazy { SaleRepositoryImpl(database.saleDao()) }
-    val clientRepository by lazy { ClientRepositoryImpl(database.clientDao()) }
-    val supplyMovementRepository by lazy { SupplyMovementRepositoryImpl(database.supplyMovementDao()) }
+    val batchRepository by lazy { BatchRepositoryImpl(database.batchDao(), database.syncTombstoneDao()) }
+    val mortalityRepository by lazy { MortalityRepositoryImpl(database.mortalityDao(), database.syncTombstoneDao()) }
+    val supplyRepository by lazy { SupplyRepositoryImpl(database.supplyDao(), database.syncTombstoneDao()) }
+    val feedingRepository by lazy { FeedingRepositoryImpl(database.feedingDao(), database.syncTombstoneDao()) }
+    val expenseRepository by lazy { ExpenseRepositoryImpl(database.expenseDao(), database.syncTombstoneDao()) }
+    val treatmentRepository by lazy { TreatmentRepositoryImpl(database.treatmentDao(), database.syncTombstoneDao()) }
+    val weighingRepository by lazy { WeighingRepositoryImpl(database.weighingDao(), database.syncTombstoneDao()) }
+    val slaughterRepository by lazy { SlaughterRepositoryImpl(database.slaughterDao(), database.syncTombstoneDao()) }
+    val saleRepository by lazy { SaleRepositoryImpl(database.saleDao(), database.syncTombstoneDao()) }
+    val clientRepository by lazy { ClientRepositoryImpl(database.clientDao(), database.syncTombstoneDao()) }
+    val supplyMovementRepository by lazy { SupplyMovementRepositoryImpl(database.supplyMovementDao(), database.syncTombstoneDao()) }
 
     val firebaseSyncManager by lazy { FirebaseSyncManager(this) }
 }

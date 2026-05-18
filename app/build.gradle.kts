@@ -3,8 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.devtools.ksp")
-    // Descomentar cuando se configure Firebase:
-    // id("com.google.gms.google-services")
+}
+
+if (project.file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }
 
 android {
@@ -49,9 +51,11 @@ kotlin {
 }
 
 dependencies {
-    // Firebase (descomentar cuando se configure sincronizacion):
-    // implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
-    // implementation("com.google.firebase:firebase-analytics")
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-analytics")
 
     // Core
     implementation("androidx.core:core-ktx:1.12.0")
@@ -88,6 +92,7 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
     // Firebase (para sincronización futura)
     // NOTA: Descomentar estas lineas cuando se configure Firebase:

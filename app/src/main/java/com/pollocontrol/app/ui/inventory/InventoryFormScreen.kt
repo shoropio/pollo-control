@@ -31,6 +31,7 @@ fun InventoryFormScreen(
         }
     )
     val isEditing = insumoId != 0L
+    val currency by app.settingsManager.currency.collectAsState()
 
     var nombre by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("OTRO") }
@@ -132,7 +133,7 @@ fun InventoryFormScreen(
                     var movObs by remember { mutableStateOf("") }
 
                     OutlinedTextField(value = movCantidad, onValueChange = { movCantidad = it }, label = { Text("Cantidad") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                    OutlinedTextField(value = movCosto, onValueChange = { movCosto = it }, label = { Text("Costo (solo entrada)") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text("$") })
+                    OutlinedTextField(value = movCosto, onValueChange = { movCosto = it }, label = { Text("Costo (solo entrada)") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
                     OutlinedTextField(value = movObs, onValueChange = { movObs = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

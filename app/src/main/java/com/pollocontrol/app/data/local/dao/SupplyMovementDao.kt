@@ -17,4 +17,7 @@ interface SupplyMovementDao {
 
     @Delete
     suspend fun delete(movement: SupplyMovementEntity)
+
+    @Query("DELETE FROM movimientos_insumo WHERE id = :id")
+    suspend fun deleteById(id: Long)
 }

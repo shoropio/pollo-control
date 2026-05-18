@@ -2,23 +2,25 @@ package com.pollocontrol.app.ui.reports
 
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
+import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.domain.model.BatchReport
+import com.pollocontrol.app.ui.settings.formatMoney
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 object ReportExporter {
 
-    fun exportToCsv(reports: List<BatchReport>): String {
+    fun exportToCsv(reports: List<BatchReport>, currency: AppCurrency): String {
         val sb = StringBuilder()
-        sb.appendLine("Lote,Raza,Fecha Ingreso,Edad (dias),Cant. Inicial,Pollos Vivos,Mortandad,Mortalidad %,Alimento Total (kg),Conversion,Peso Promedio (kg),Costo Total,Costo/Pollo,Costo/Kilo,Ventas Totales,Utilidad,Rentabilidad %")
+        sb.appendLine("Lote,Raza,Fecha Ingreso,Edad (dias),Cant. Inicial,Pollos Vivos,Mortandad,Mortalidad %,Alimento Total (kg),Conversion,Peso Promedio (kg),Moneda,Costo Total,Costo/Pollo,Costo/Kilo,Ventas Totales,Utilidad,Rentabilidad %")
         for (r in reports) {
             sb.appendLine(
                 "${r.batchName},${r.breed},${r.entryDate},${r.age}," +
                         "${r.initialCount},${r.aliveCount},${r.totalMortality}," +
                         "${"%.1f".format(r.mortalityPercentage)},${r.totalFeed}," +
                         "${"%.2f".format(r.feedConversion)},${"%.3f".format(r.avgWeight)}," +
-                        "${"%.2f".format(r.totalCost)},${"%.2f".format(r.costPerChicken)}," +
+                        "${currency.code},${"%.2f".format(r.totalCost)},${"%.2f".format(r.costPerChicken)}," +
                         "${"%.2f".format(r.costPerKilo)},${"%.2f".format(r.totalSales)}," +
                         "${"%.2f".format(r.profit)},${"%.1f".format(r.profitability)}"
             )
@@ -26,7 +28,7 @@ object ReportExporter {
         return sb.toString()
     }
 
-    fun exportToPdf(reports: List<BatchReport>): ByteArray {
+    fun exportToPdf(reports: List<BatchReport>, currency: AppCurrency): ByteArray {
         val document = PdfDocument()
         val pageWidth = 792
         val pageHeight = 1128
@@ -46,7 +48,7 @@ object ReportExporter {
         canvas.drawText("Reportes - PolloControl", 40f, y, titlePaint)
         y += 36f
         val dateStr = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(java.util.Date())
-        canvas.drawText("Generado: $dateStr", 40f, y, subtitlePaint)
+        canvas.drawText("Generado: $dateStr | Moneda: ${currency.code}", 40f, y, subtitlePaint)
         y += 32f
 
         for (r in reports) {
@@ -72,9 +74,9 @@ object ReportExporter {
             drawField("Alimento:", "${"%.2f".format(r.totalFeed)} kg", 520f)
             y += 32f
 
-            drawField("Costo Total:", "$${"%.2f".format(r.totalCost)}", 40f)
-            drawField("Ventas:", "$${"%.2f".format(r.totalSales)}", 280f)
-            drawField("Utilidad:", "$${"%.2f".format(r.profit)}", 520f)
+            drawField("Costo Total:", formatMoney(r.totalCost, currency), 40f)
+            drawField("Ventas:", formatMoney(r.totalSales, currency), 280f)
+            drawField("Utilidad:", formatMoney(r.profit, currency), 520f)
             y += 32f
 
             drawField("Conversion:", "${"%.2f".format(r.feedConversion)}", 40f)

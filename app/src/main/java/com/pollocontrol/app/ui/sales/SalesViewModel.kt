@@ -19,28 +19,15 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     val sales: StateFlow<List<SaleEntity>> = saleRepo.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _clients = MutableStateFlow<List<ClientEntity>>(emptyList())
-    val clients: StateFlow<List<ClientEntity>> = _clients.asStateFlow()
+    val clients: StateFlow<List<ClientEntity>> = clientRepo.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _batches = MutableStateFlow<List<BatchEntity>>(emptyList())
-    val batches: StateFlow<List<BatchEntity>> = _batches.asStateFlow()
+    val batches: StateFlow<List<BatchEntity>> = batchRepo.getAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private val _totalSales = MutableStateFlow(0.0)
-    val totalSales: StateFlow<Double> = _totalSales.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            clientRepo.getAll().collect { _clients.value = it }
-        }
-        viewModelScope.launch {
-            batchRepo.getAll().collect { _batches.value = it }
-        }
-        viewModelScope.launch {
-            saleRepo.getAll().collect { list ->
-                _totalSales.value = list.sumOf { it.total }
-            }
-        }
-    }
+    val totalSales: StateFlow<Double> = sales
+        .map { list -> list.sumOf { it.total } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     fun getById(id: Long, onResult: (SaleEntity?) -> Unit) {
         viewModelScope.launch {

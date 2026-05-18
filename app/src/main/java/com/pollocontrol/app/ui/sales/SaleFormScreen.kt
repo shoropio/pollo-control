@@ -36,6 +36,7 @@ fun SaleFormScreen(
     val isEditing = ventaId != 0L
     val batches by viewModel.batches.collectAsState()
     val clients by viewModel.clients.collectAsState()
+    val currency by app.settingsManager.currency.collectAsState()
 
     var tipo by remember { mutableStateOf("SACRIFICADO") }
     var modalidad by remember { mutableStateOf("UNIDAD") }
@@ -112,9 +113,9 @@ fun SaleFormScreen(
                 }
 
                 OutlinedTextField(value = cantidad, onValueChange = { cantidad = it; cantidadError = false; total = "" }, label = { Text("Cantidad *") }, isError = cantidadError, modifier = Modifier.fillMaxWidth(), singleLine = true)
-                OutlinedTextField(value = precioUnitario, onValueChange = { precioUnitario = it; precioError = false; total = "" }, label = { Text("Precio Unitario *") }, isError = precioError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text("$") })
+                OutlinedTextField(value = precioUnitario, onValueChange = { precioUnitario = it; precioError = false; total = "" }, label = { Text("Precio Unitario *") }, isError = precioError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
-                OutlinedTextField(value = if (total.isNotEmpty()) total else String.format("%.2f", calculatedTotal), onValueChange = { total = it }, label = { Text("Total") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text("$") })
+                OutlinedTextField(value = if (total.isNotEmpty()) total else String.format("%.2f", calculatedTotal), onValueChange = { total = it }, label = { Text("Total") }, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
                 // Fecha
                 val dateStr = remember(fecha) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fecha)) }

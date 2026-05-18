@@ -27,6 +27,9 @@ interface BatchDao {
     @Delete
     suspend fun delete(batch: BatchEntity)
 
+    @Query("DELETE FROM lotes WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("SELECT COUNT(*) FROM lotes WHERE estado = 'ACTIVO'")
     fun getActiveCount(): Flow<Int>
 }
