@@ -74,7 +74,7 @@ val md_theme_light_errorContainer = Color(0xFFFFE5E5)
 val md_theme_light_onErrorContainer = Color(0xFF410002)
 
 // Material 3 dark color scheme
-val md_theme_dark_primary = BlueLight
+val md_theme_dark_primary = BluePrimary
 val md_theme_dark_onPrimary = Color(0xFF003549)
 val md_theme_dark_primaryContainer = Color(0xFF004C6D)
 val md_theme_dark_onPrimaryContainer = BlueSurface

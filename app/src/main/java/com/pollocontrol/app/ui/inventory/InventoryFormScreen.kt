@@ -62,7 +62,7 @@ fun InventoryFormScreen(
             TopAppBar(
                 title = { Text(if (isEditing) "Editar Insumo" else "Nuevo Insumo") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -84,7 +84,7 @@ fun InventoryFormScreen(
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = click@{
+                Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
                     if (nombre.isBlank()) { nombreError = true; return@click }
                     viewModel.save(SupplyEntity(
                         id = if (isEditing) insumoId else 0L,
@@ -100,6 +100,7 @@ fun InventoryFormScreen(
                 if (isEditing) {
                     var showDeleteConfirm by remember { mutableStateOf(false) }
                     OutlinedButton(
+                        shape = androidx.compose.ui.graphics.RectangleShape,
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -114,11 +115,11 @@ fun InventoryFormScreen(
                             title = { Text("Eliminar Insumo") },
                             text = { Text("Esta accion no se puede deshacer.") },
                             confirmButton = {
-                                TextButton(onClick = {
+                                TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                                     viewModel.delete(SupplyEntity(id = insumoId, nombre = "", tipo = "", stockActual = 0.0, stockMinimo = 0.0, unidad = "", observaciones = "")) { onNavigateBack() }
                                 }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
                             },
-                            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") } }
+                            dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { showDeleteConfirm = false }) { Text("Cancelar") } }
                         )
                     }
                 }
@@ -137,13 +138,13 @@ fun InventoryFormScreen(
                     OutlinedTextField(value = movObs, onValueChange = { movObs = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = click1@{
+                        Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click1@{
                             val cant = movCantidad.toDoubleOrNull() ?: return@click1
                             viewModel.addStock(insumoId, cant, movCosto.toDoubleOrNull(), movObs)
                             movCantidad = ""; movCosto = ""; movObs = ""
                         }, modifier = Modifier.weight(1f)) { Icon(Icons.Default.Add, "Entrada"); Spacer(Modifier.width(4.dp)); Text("Entrada") }
 
-                        OutlinedButton(onClick = click2@{
+                        OutlinedButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click2@{
                             val cant = movCantidad.toDoubleOrNull() ?: return@click2
                             viewModel.removeStock(insumoId, cant, movObs)
                             movCantidad = ""; movCosto = ""; movObs = ""

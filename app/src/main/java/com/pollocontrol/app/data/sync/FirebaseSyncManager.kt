@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 package com.pollocontrol.app.data.sync
 
 import android.content.Context
@@ -10,9 +15,11 @@ import com.google.gson.Gson
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.ClientEntity
+import com.pollocontrol.app.data.local.entity.EggProductionEntity
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
 import com.pollocontrol.app.data.local.entity.FeedingEntity
 import com.pollocontrol.app.data.local.entity.MortalityEntity
+import com.pollocontrol.app.data.local.entity.QuailBatchEntity
 import com.pollocontrol.app.data.local.entity.SaleEntity
 import com.pollocontrol.app.data.local.entity.SlaughterEntity
 import com.pollocontrol.app.data.local.entity.SupplyEntity
@@ -109,6 +116,8 @@ class FirebaseSyncManager(private val context: Context) {
             uploaded += uploadCollection(userDoc, SyncCollections.WEIGHING, app.database.weighingDao().getAll().first())
             uploaded += uploadCollection(userDoc, SyncCollections.SLAUGHTER, app.database.slaughterDao().getAll().first())
             uploaded += uploadCollection(userDoc, SyncCollections.SALES, app.database.saleDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.QUAIL_BATCHES, app.database.quailBatchDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.EGG_PRODUCTION, app.database.eggProductionDao().getAll().first())
 
             downloaded += downloadCollection(userDoc, SyncCollections.BATCHES, BatchEntity::class.java, app.database.batchDao()::insert)
             downloaded += downloadCollection(userDoc, SyncCollections.CLIENTS, ClientEntity::class.java, app.database.clientDao()::insert)
@@ -121,6 +130,8 @@ class FirebaseSyncManager(private val context: Context) {
             downloaded += downloadCollection(userDoc, SyncCollections.WEIGHING, WeighingEntity::class.java, app.database.weighingDao()::insert)
             downloaded += downloadCollection(userDoc, SyncCollections.SLAUGHTER, SlaughterEntity::class.java, app.database.slaughterDao()::insert)
             downloaded += downloadCollection(userDoc, SyncCollections.SALES, SaleEntity::class.java, app.database.saleDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.QUAIL_BATCHES, QuailBatchEntity::class.java, app.database.quailBatchDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.EGG_PRODUCTION, EggProductionEntity::class.java, app.database.eggProductionDao()::insert)
 
             publishResult(
                 SyncStatus.SYNCED,
@@ -153,6 +164,40 @@ class FirebaseSyncManager(private val context: Context) {
             batch.commit().await()
         }
         return payloads.size
+    }
+
+    // ✅ Método auxiliar para paginar queries sin cargar todo en memoria
+    private suspend inline fun <T : Any> uploadCollectionPaginated(
+        userDoc: com.google.firebase.firestore.DocumentReference,
+        collectionName: String,
+        daoQuery: suspend (limit: Int, offset: Int) -> List<T>,
+        pageSize: Int = 1000
+    ): Int {
+        var offset = 0
+        var totalUploaded = 0
+        var currentPage: List<T>
+
+        do {
+            currentPage = daoQuery(pageSize, offset)
+            if (currentPage.isNotEmpty()) {
+                val payloads = currentPage.mapNotNull { record ->
+                    val data = (record as Any).toFirestoreMap()
+                    val id = data["id"]?.asLongString() ?: return@mapNotNull null
+                    id to data
+                }
+                payloads.chunked(FIRESTORE_BATCH_LIMIT).forEach { chunk ->
+                    val batch = FirebaseFirestore.getInstance().batch()
+                    chunk.forEach { (id, data) ->
+                        batch.set(userDoc.collection(collectionName).document(id), data, SetOptions.merge())
+                    }
+                    batch.commit().await()
+                }
+                totalUploaded += payloads.size
+                offset += pageSize
+            }
+        } while (currentPage.size == pageSize)
+
+        return totalUploaded
     }
 
     private suspend fun uploadTombstones(
@@ -202,6 +247,8 @@ class FirebaseSyncManager(private val context: Context) {
             SyncCollections.WEIGHING -> app.database.weighingDao().deleteById(tombstone.documentId)
             SyncCollections.SLAUGHTER -> app.database.slaughterDao().deleteById(tombstone.documentId)
             SyncCollections.SALES -> app.database.saleDao().deleteById(tombstone.documentId)
+            SyncCollections.QUAIL_BATCHES -> app.database.quailBatchDao().deleteById(tombstone.documentId)
+            SyncCollections.EGG_PRODUCTION -> app.database.eggProductionDao().deleteById(tombstone.documentId)
         }
     }
 
@@ -216,9 +263,13 @@ class FirebaseSyncManager(private val context: Context) {
                 deleteRemoteWhere(userDoc, SyncCollections.TREATMENTS, "loteId", tombstone.documentId)
                 deleteRemoteWhere(userDoc, SyncCollections.WEIGHING, "loteId", tombstone.documentId)
                 deleteRemoteWhere(userDoc, SyncCollections.SLAUGHTER, "loteId", tombstone.documentId)
+                deleteRemoteWhere(userDoc, SyncCollections.EGG_PRODUCTION, "loteId", tombstone.documentId)
             }
             SyncCollections.SUPPLIES -> {
                 deleteRemoteWhere(userDoc, SyncCollections.SUPPLY_MOVEMENTS, "insumoId", tombstone.documentId)
+            }
+            SyncCollections.QUAIL_BATCHES -> {
+                deleteRemoteWhere(userDoc, SyncCollections.EGG_PRODUCTION, "loteId", tombstone.documentId)
             }
         }
     }
@@ -247,6 +298,9 @@ class FirebaseSyncManager(private val context: Context) {
         snapshot.documents.forEach { document ->
             val data = document.data.orEmpty().toMutableMap()
             document.id.toLongOrNull()?.let { data["id"] = it }
+            if (collectionName == SyncCollections.EGG_PRODUCTION && data["loteId"] == null) {
+                data["loteId"] = data["loteCodonizId"]
+            }
             insert(gson.fromJson(gson.toJson(data), clazz))
         }
         return snapshot.size()
@@ -258,6 +312,8 @@ class FirebaseSyncManager(private val context: Context) {
             "nombre" to nombre,
             "fechaIngreso" to fechaIngreso,
             "cantidadInicial" to cantidadInicial,
+            "especie" to especie,
+            "proposito" to proposito,
             "precioPorPollito" to precioPorPollito,
             "raza" to raza,
             "galpon" to galpon,
@@ -363,6 +419,29 @@ class FirebaseSyncManager(private val context: Context) {
             "total" to total,
             "metodoPago" to metodoPago,
             "estadoPago" to estadoPago,
+            "observaciones" to observaciones
+        )
+        is QuailBatchEntity -> mapOf(
+            "id" to id,
+            "nombre" to nombre,
+            "fechaIngreso" to fechaIngreso,
+            "cantidadInicial" to cantidadInicial,
+            "precioUnitario" to precioUnitario,
+            "raza" to raza,
+            "galpon" to galpon,
+            "proveedor" to proveedor,
+            "estado" to estado,
+            "observaciones" to observaciones
+        )
+        is EggProductionEntity -> mapOf(
+            "id" to id,
+            "loteId" to loteId,
+            "fecha" to fecha,
+            "cantidadHuevos" to cantidadHuevos,
+            "pesoPromedio" to pesoPromedio,
+            "calidadA" to calidadA,
+            "calidadB" to calidadB,
+            "rechazos" to rechazos,
             "observaciones" to observaciones
         )
         else -> emptyMap()

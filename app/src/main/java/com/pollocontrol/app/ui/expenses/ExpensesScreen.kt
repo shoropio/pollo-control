@@ -56,11 +56,11 @@ fun ExpensesScreen(
             TopAppBar(
                 title = { Text("Gastos") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {

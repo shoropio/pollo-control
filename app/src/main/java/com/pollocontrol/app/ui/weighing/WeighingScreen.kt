@@ -63,11 +63,11 @@ fun WeighingScreen(
             TopAppBar(
                 title = { Text("Pesajes - ${lote?.nombre ?: ""}") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { editingRecord = WeighingEntity(loteId = batchId, fecha = System.currentTimeMillis(), edadLote = 0, cantidadAves = 0, pesoPromedio = 0.0) }) { Icon(Icons.Default.Add, "Registrar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { editingRecord = WeighingEntity(loteId = batchId, fecha = System.currentTimeMillis(), edadLote = 0, cantidadAves = 0, pesoPromedio = 0.0) }) { Icon(Icons.Default.Add, "Registrar") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -154,7 +154,7 @@ private fun WeighingFormDialog(loteId: Long, initial: WeighingEntity? = null, on
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                 if (edadLote.isBlank() || edadLote.toIntOrNull() == null) { edadError = true; return@TextButton }
                 if (cantidadAves.isBlank() || cantidadAves.toIntOrNull() == null) { cantError = true; return@TextButton }
                 if (pesoPromedio.isBlank() || pesoPromedio.toDoubleOrNull() == null) { pesoError = true; return@TextButton }
@@ -168,7 +168,7 @@ private fun WeighingFormDialog(loteId: Long, initial: WeighingEntity? = null, on
                 ))
             }) { Text(if (isEditing) "Actualizar" else "Guardar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) { Text("Cancelar") } }
     )
     if (showDatePicker) { PolloDatePickerDialog(onDateSelected = { fecha = it }, onDismiss = { showDatePicker = false }) }
 }

@@ -28,6 +28,8 @@ import com.pollocontrol.app.ui.clients.ClientsScreen
 import com.pollocontrol.app.ui.clients.ClientFormScreen
 import com.pollocontrol.app.ui.reports.ReportsScreen
 import com.pollocontrol.app.ui.settings.SettingsScreen
+import com.pollocontrol.app.ui.quail.QuailBatchesScreen
+import com.pollocontrol.app.ui.eggs.EggProductionScreen
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.mortality.MortalityScreen
 import com.pollocontrol.app.ui.navigation.MoreScreen
@@ -209,6 +211,8 @@ fun PolloControlNavGraph(
                 onNavigateToExpenses = { navController.navigate(Screen.Expenses.route) },
                 onNavigateToClients = { navController.navigate(Screen.Clients.route) },
                 onNavigateToReports = { navController.navigate(Screen.Reports.route) },
+                onNavigateToQuailBatches = { navController.navigate(Screen.QuailBatches.route) },
+                onNavigateToEggProduction = { navController.navigate(Screen.EggProduction.route) },
                 onNavigateToBackupRestore = { navController.navigate(Screen.BackupRestore.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
                 onSync = { app.firebaseSyncManager.syncAll() },
@@ -261,6 +265,20 @@ fun PolloControlNavGraph(
             ReportsScreen(
                 app = app,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.QuailBatches.route) {
+            QuailBatchesScreen(
+                app = app,
+                navController = navController
+            )
+        }
+
+        composable(Screen.EggProduction.route) {
+            EggProductionScreen(
+                app = app,
+                navController = navController
             )
         }
 

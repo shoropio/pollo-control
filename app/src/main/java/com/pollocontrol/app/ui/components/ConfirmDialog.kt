@@ -17,12 +17,12 @@ fun ConfirmDialog(
         title = { Text(title) },
         text = { Text(message) },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onConfirm) {
                 Text(confirmText, color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) {
                 Text(dismissText)
             }
         }

@@ -39,6 +39,7 @@ fun BatchFormScreen(
     var nombre by remember { mutableStateOf("") }
     var fechaIngreso by remember { mutableStateOf(System.currentTimeMillis()) }
     var cantidadInicial by remember { mutableStateOf("") }
+    var tipoLote by remember { mutableStateOf("POLLO_CARNE") }
     var precioPorPollito by remember { mutableStateOf("") }
     var raza by remember { mutableStateOf("") }
     var galpon by remember { mutableStateOf("") }
@@ -60,6 +61,7 @@ fun BatchFormScreen(
                     nombre = batch.nombre
                     fechaIngreso = batch.fechaIngreso
                     cantidadInicial = batch.cantidadInicial.toString()
+                    tipoLote = batchTypeKey(batch.especie, batch.proposito)
                     precioPorPollito = batch.precioPorPollito.toString()
                     raza = batch.raza
                     galpon = batch.galpon
@@ -73,6 +75,13 @@ fun BatchFormScreen(
     }
 
     val estados = listOf("ACTIVO", "FINALIZADO", "VENDIDO", "SACRIFICADO")
+    val tiposLote = listOf(
+        BatchTypeOption("POLLO_CARNE", "Pollo de engorde", "POLLO", "CARNE"),
+        BatchTypeOption("GALLINA_HUEVOS", "Gallina ponedora", "GALLINA", "HUEVOS"),
+        BatchTypeOption("CODORNIZ_HUEVOS", "Codorniz", "CODORNIZ", "HUEVOS")
+    )
+    val selectedBatchType = tiposLote.first { it.key == tipoLote }
+    var tipoExpanded by remember { mutableStateOf(false) }
     var expanded by remember { mutableStateOf(false) }
     val dateStr = remember(fechaIngreso) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fechaIngreso)) }
 
@@ -81,7 +90,7 @@ fun BatchFormScreen(
             TopAppBar(
                 title = { Text(if (isEditing) "Editar Lote" else "Nuevo Lote") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -94,9 +103,31 @@ fun BatchFormScreen(
 
                 OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text("Fecha de Ingreso") }, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Seleccionar fecha") } })
 
-                OutlinedTextField(value = cantidadInicial, onValueChange = { cantidadInicial = it; cantidadError = false }, label = { Text("Cantidad Inicial *") }, isError = cantidadError, supportingText = if (cantidadError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                ExposedDropdownMenuBox(expanded = tipoExpanded, onExpandedChange = { tipoExpanded = !tipoExpanded }) {
+                    OutlinedTextField(
+                        value = selectedBatchType.label,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Tipo de lote") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tipoExpanded) },
+                        modifier = Modifier.fillMaxWidth().menuAnchor()
+                    )
+                    ExposedDropdownMenu(expanded = tipoExpanded, onDismissRequest = { tipoExpanded = false }) {
+                        tiposLote.forEach { option ->
+                            DropdownMenuItem(
+                                text = { Text(option.label) },
+                                onClick = {
+                                    tipoLote = option.key
+                                    tipoExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
-                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text("Precio por Pollito *") }, isError = precioError, supportingText = if (precioError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
+                OutlinedTextField(value = cantidadInicial, onValueChange = { cantidadInicial = it; cantidadError = false }, label = { Text("Cantidad inicial de aves *") }, isError = cantidadError, supportingText = if (cantidadError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
+
+                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text("Precio unitario por ave *") }, isError = precioError, supportingText = if (precioError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
                 OutlinedTextField(value = raza, onValueChange = { raza = it }, label = { Text("Raza / Línea Genética") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
@@ -118,7 +149,7 @@ fun BatchFormScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                Button(onClick = click@{
+                Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
                     var valid = true
                     if (nombre.isBlank()) { nombreError = true; valid = false }
                     if (cantidadInicial.isBlank() || cantidadInicial.toIntOrNull() == null || cantidadInicial.toInt() <= 0) { cantidadError = true; valid = false }
@@ -130,6 +161,8 @@ fun BatchFormScreen(
                         nombre = nombre,
                         fechaIngreso = fechaIngreso,
                         cantidadInicial = cantidadInicial.toInt(),
+                        especie = selectedBatchType.especie,
+                        proposito = selectedBatchType.proposito,
                         precioPorPollito = precioPorPollito.toDouble(),
                         raza = raza,
                         galpon = galpon,
@@ -144,6 +177,7 @@ fun BatchFormScreen(
                 if (isEditing) {
                     var showDeleteConfirm by remember { mutableStateOf(false) }
                     OutlinedButton(
+                        shape = androidx.compose.ui.graphics.RectangleShape,
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -172,4 +206,17 @@ fun BatchFormScreen(
     if (showDatePicker) {
         PolloDatePickerDialog(onDateSelected = { fechaIngreso = it }, onDismiss = { showDatePicker = false })
     }
+}
+
+private data class BatchTypeOption(
+    val key: String,
+    val label: String,
+    val especie: String,
+    val proposito: String
+)
+
+private fun batchTypeKey(especie: String, proposito: String): String = when {
+    especie == "CODORNIZ" -> "CODORNIZ_HUEVOS"
+    especie == "GALLINA" && proposito == "HUEVOS" -> "GALLINA_HUEVOS"
+    else -> "POLLO_CARNE"
 }

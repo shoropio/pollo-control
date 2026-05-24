@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 package com.pollocontrol.app.ui.reports
 
 import android.app.Application
@@ -6,6 +11,8 @@ import androidx.lifecycle.viewModelScope
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.domain.model.BatchReport
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -19,47 +26,62 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     fun generateAllReports() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
             try {
                 val batches = app.batchRepository.getAll().first()
-                val reports = batches.map { batch ->
-                    val mortality = app.mortalityRepository.getTotalByBatch(batch.id)
-                    val alive = batch.cantidadInicial - mortality
-                    val totalFeed = app.feedingRepository.getTotalByBatch(batch.id)
-                    val totalExpenses = app.expenseRepository.getTotalByBatch(batch.id)
-                    val totalSales = app.saleRepository.getAll().first()
-                        .filter { it.loteId == batch.id }.sumOf { it.total }
-                    val latestWeighing = app.weighingRepository.getLatest(batch.id)
-                    val avgWeight = latestWeighing?.pesoPromedio ?: 0.0
-                    val conversion = if (alive > 0 && avgWeight > 0) totalFeed / (alive * avgWeight) else 0.0
-                    val costPerChicken = if (alive > 0) totalExpenses / alive else 0.0
-                    val costPerKilo = if (alive > 0 && avgWeight > 0) totalExpenses / (alive * avgWeight) else 0.0
-                    val profit = totalSales - totalExpenses
-                    val profitability = if (totalExpenses > 0) (profit / totalExpenses) * 100 else 0.0
-                    val mortalityPct = if (batch.cantidadInicial > 0) (mortality.toDouble() / batch.cantidadInicial) * 100 else 0.0
-                    val age = ((System.currentTimeMillis() - batch.fechaIngreso) / (1000 * 60 * 60 * 24)).toInt()
 
-                    BatchReport(
-                        batchName = batch.nombre,
-                        breed = batch.raza,
-                        entryDate = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(batch.fechaIngreso)),
-                        age = age,
-                        initialCount = batch.cantidadInicial,
-                        aliveCount = alive,
-                        totalMortality = mortality,
-                        mortalityPercentage = mortalityPct,
-                        totalFeed = totalFeed,
-                        feedConversion = conversion,
-                        avgWeight = avgWeight,
-                        totalCost = totalExpenses,
-                        costPerChicken = costPerChicken,
-                        costPerKilo = costPerKilo,
-                        totalSales = totalSales,
-                        profit = profit,
-                        profitability = profitability
-                    )
-                }
+                // ✅ Ejecutar todas las queries en paralelo usando async/await
+                val reports = batches.map { batch ->
+                    async {
+                        val mortalityDeferred = async { app.mortalityRepository.getTotalByBatch(batch.id) }
+                        val feedDeferred = async { app.feedingRepository.getTotalByBatch(batch.id) }
+                        val expensesDeferred = async { app.expenseRepository.getTotalByBatch(batch.id) }
+                        val weighingDeferred = async { app.weighingRepository.getLatest(batch.id) }
+
+                        // Obtener ventas SOLO para este lote, no todas
+                        val salesDeferred = async { app.saleRepository.getByBatch(batch.id).first() }
+
+                        // Esperar todos los resultados en paralelo
+                        val mortality = mortalityDeferred.await()
+                        val totalFeed = feedDeferred.await()
+                        val totalExpenses = expensesDeferred.await()
+                        val latestWeighing = weighingDeferred.await()
+                        val batchSales = salesDeferred.await()
+
+                        val alive = batch.cantidadInicial - mortality
+                        val totalSales = batchSales.sumOf { it.total }
+                        val avgWeight = latestWeighing?.pesoPromedio ?: 0.0
+                        val conversion = if (alive > 0 && avgWeight > 0) totalFeed / (alive * avgWeight) else 0.0
+                        val costPerChicken = if (alive > 0) totalExpenses / alive else 0.0
+                        val costPerKilo = if (alive > 0 && avgWeight > 0) totalExpenses / (alive * avgWeight) else 0.0
+                        val profit = totalSales - totalExpenses
+                        val profitability = if (totalExpenses > 0) (profit / totalExpenses) * 100 else 0.0
+                        val mortalityPct = if (batch.cantidadInicial > 0) (mortality.toDouble() / batch.cantidadInicial) * 100 else 0.0
+                        val age = ((System.currentTimeMillis() - batch.fechaIngreso) / (1000 * 60 * 60 * 24)).toInt()
+
+                        BatchReport(
+                            batchName = batch.nombre,
+                            breed = batch.raza,
+                            entryDate = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date(batch.fechaIngreso)),
+                            age = age,
+                            initialCount = batch.cantidadInicial,
+                            aliveCount = alive,
+                            totalMortality = mortality,
+                            mortalityPercentage = mortalityPct,
+                            totalFeed = totalFeed,
+                            feedConversion = conversion,
+                            avgWeight = avgWeight,
+                            totalCost = totalExpenses,
+                            costPerChicken = costPerChicken,
+                            costPerKilo = costPerKilo,
+                            totalSales = totalSales,
+                            profit = profit,
+                            profitability = profitability
+                        )
+                    }
+                }.awaitAll()
+
                 _reports.value = reports
             } catch (e: Exception) {
                 e.printStackTrace()

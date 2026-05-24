@@ -68,7 +68,7 @@ fun ExpenseFormScreen(
             TopAppBar(
                 title = { Text(if (isEditing) "Editar Gasto" else "Nuevo Gasto") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -107,7 +107,7 @@ fun ExpenseFormScreen(
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = click@{
+                Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
                     var valid = true
                     if (descripcion.isBlank()) { descError = true; valid = false }
                     if (monto.isBlank() || monto.toDoubleOrNull() == null || monto.toDouble() <= 0) { montoError = true; valid = false }
@@ -125,6 +125,7 @@ fun ExpenseFormScreen(
                 if (isEditing) {
                     var showDeleteConfirm by remember { mutableStateOf(false) }
                     OutlinedButton(
+                        shape = androidx.compose.ui.graphics.RectangleShape,
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
@@ -139,11 +140,11 @@ fun ExpenseFormScreen(
                             title = { Text("Eliminar Gasto") },
                             text = { Text("Esta accion no se puede deshacer.") },
                             confirmButton = {
-                                TextButton(onClick = {
+                                TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                                     viewModel.delete(ExpenseEntity(id = gastoId, loteId = null, tipo = "", descripcion = "", monto = 0.0, fecha = 0L, observaciones = "")) { onNavigateBack() }
                                 }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
                             },
-                            dismissButton = { TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancelar") } }
+                            dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { showDeleteConfirm = false }) { Text("Cancelar") } }
                         )
                     }
                 }

@@ -21,7 +21,12 @@ import androidx.room.Index
             onDelete = ForeignKey.SET_NULL
         )
     ],
-    indices = [Index("loteId"), Index("clienteId")]
+    indices = [
+        Index("loteId"),
+        Index("clienteId"),
+        Index("fecha"),
+        Index(value = ["fecha", "loteId"], name = "idx_sale_fecha_lote")
+    ]
 )
 data class SaleEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Tune
@@ -125,7 +126,7 @@ fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    OutlinedButton(onClick = onSignOut) {
+                    OutlinedButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onSignOut) {
                         Text("Salir")
                     }
                 }
@@ -164,6 +165,7 @@ fun SettingsScreen(
                         )
                     }
                     ElevatedButton(
+                        shape = androidx.compose.ui.graphics.RectangleShape,
                         onClick = {
                             isSyncing = true
                             scope.launch {
@@ -179,6 +181,40 @@ fun SettingsScreen(
                         Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(8.dp))
                         Text(if (isSyncing) "Sincronizando" else "Probar sincronizacion")
+                    }
+                }
+            }
+
+            SettingsSectionTitle("App")
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        modifier = Modifier.size(44.dp).clip(RectangleShape),
+                        color = BluePrimary.copy(alpha = 0.12f)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Info, contentDescription = null, tint = BluePrimary)
+                        }
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("PolloControl", fontWeight = FontWeight.Medium)
+                        Text(
+                            "Copyright © 2026. Shoropio Corporation",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Todos los derechos reservados.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }

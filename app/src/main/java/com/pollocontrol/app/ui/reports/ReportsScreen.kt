@@ -70,7 +70,7 @@ fun ReportsScreen(
             TopAppBar(
                 title = { Text("Reportes") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -80,6 +80,7 @@ fun ReportsScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
+                    shape = androidx.compose.ui.graphics.RectangleShape,
                     onClick = { viewModel.generateAllReports() },
                     modifier = Modifier.weight(1f).height(48.dp),
                     enabled = !isLoading
@@ -94,6 +95,8 @@ fun ReportsScreen(
                 }
 
                 OutlinedButton(
+
+                    shape = androidx.compose.ui.graphics.RectangleShape,
                     onClick = {
                         if (reports.isNotEmpty()) {
                             csvLauncher.launch("reportes_pollocontrol.csv")
@@ -108,6 +111,8 @@ fun ReportsScreen(
                 }
 
                 OutlinedButton(
+
+                    shape = androidx.compose.ui.graphics.RectangleShape,
                     onClick = {
                         if (reports.isNotEmpty()) {
                             pdfLauncher.launch("reportes_pollocontrol.pdf")
@@ -125,7 +130,7 @@ fun ReportsScreen(
             exportMessage?.let { msg ->
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Text(
                         msg,

@@ -78,6 +78,8 @@ fun LoginScreen(
             Spacer(Modifier.height(32.dp))
 
             Button(
+
+                shape = androidx.compose.ui.graphics.RectangleShape,
                 onClick = {
                     if (activity == null) {
                         errorMessage = "No se pudo abrir el inicio de sesion."

@@ -67,11 +67,11 @@ fun HealthScreen(
             TopAppBar(
                 title = { Text("Sanidad - ${lote?.nombre ?: ""}") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { editingRecord = TreatmentEntity(loteId = batchId, tipo = "", nombre = "", fechaAplicacion = System.currentTimeMillis()) }) { Icon(Icons.Default.Add, "Registrar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { editingRecord = TreatmentEntity(loteId = batchId, tipo = "", nombre = "", fechaAplicacion = System.currentTimeMillis()) }) { Icon(Icons.Default.Add, "Registrar") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -176,7 +176,7 @@ private fun HealthFormDialog(loteId: Long, initial: TreatmentEntity? = null, cur
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                 if (nombre.isBlank()) { nombreError = true; return@TextButton }
                 onSave(TreatmentEntity(
                     id = initial?.id ?: 0L,
@@ -188,7 +188,7 @@ private fun HealthFormDialog(loteId: Long, initial: TreatmentEntity? = null, cur
                 ))
             }) { Text(if (isEditing) "Actualizar" else "Guardar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) { Text("Cancelar") } }
     )
     if (showDatePicker) { PolloDatePickerDialog(onDateSelected = { fecha = it }, onDismiss = { showDatePicker = false }) }
 }

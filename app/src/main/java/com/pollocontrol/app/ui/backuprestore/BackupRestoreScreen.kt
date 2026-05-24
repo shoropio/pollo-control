@@ -72,9 +72,9 @@ fun BackupRestoreScreen(
                 title = { Text("Copia de Seguridad") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
@@ -98,6 +98,8 @@ fun BackupRestoreScreen(
             Spacer(Modifier.height(8.dp))
 
             Button(
+
+                shape = androidx.compose.ui.graphics.RectangleShape,
                 onClick = { backupLauncher.launch("pollocontrol_backup.db") },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 enabled = !isLoading,
@@ -109,6 +111,8 @@ fun BackupRestoreScreen(
             }
 
             OutlinedButton(
+
+                shape = androidx.compose.ui.graphics.RectangleShape,
                 onClick = { restoreLauncher.launch(arrayOf("application/octet-stream", "application/zip")) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 enabled = !isLoading,
@@ -130,7 +134,7 @@ fun BackupRestoreScreen(
                         containerColor = if (it.startsWith("Error"))
                             MaterialTheme.colorScheme.errorContainer
                         else
-                            MaterialTheme.colorScheme.primaryContainer
+                            MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Text(

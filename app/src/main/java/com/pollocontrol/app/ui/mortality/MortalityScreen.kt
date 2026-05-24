@@ -64,11 +64,11 @@ fun MortalityScreen(
             TopAppBar(
                 title = { Text("Mortalidad - ${lote?.nombre ?: ""}") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { editingRecord = MortalityEntity(loteId = batchId, fecha = System.currentTimeMillis(), cantidad = 0) }) { Icon(Icons.Default.Add, "Registrar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { editingRecord = MortalityEntity(loteId = batchId, fecha = System.currentTimeMillis(), cantidad = 0) }) { Icon(Icons.Default.Add, "Registrar") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -177,7 +177,7 @@ private fun MortalityFormDialog(loteId: Long, initial: MortalityEntity? = null, 
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                 if (cantidad.isBlank() || cantidad.toIntOrNull() == null || cantidad.toInt() <= 0) { cantidadError = true; return@TextButton }
                 onSave(MortalityEntity(
                     id = initial?.id ?: 0L,
@@ -186,7 +186,7 @@ private fun MortalityFormDialog(loteId: Long, initial: MortalityEntity? = null, 
                 ))
             }) { Text(if (isEditing) "Actualizar" else "Guardar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) { Text("Cancelar") } }
     )
     if (showDatePicker) { PolloDatePickerDialog(onDateSelected = { fecha = it }, onDismiss = { showDatePicker = false }) }
 }

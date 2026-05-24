@@ -87,7 +87,7 @@ fun SaleFormScreen(
             TopAppBar(
                 title = { Text(if (isEditing) "Editar Venta" else "Nueva Venta") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -160,7 +160,7 @@ fun SaleFormScreen(
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = click@{
+                Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
                     var valid = true
                     if (cantidad.isBlank() || cantidad.toDoubleOrNull() == null || cantidad.toDouble() <= 0) { cantidadError = true; valid = false }
                     if (precioUnitario.isBlank() || precioUnitario.toDoubleOrNull() == null || precioUnitario.toDouble() <= 0) { precioError = true; valid = false }

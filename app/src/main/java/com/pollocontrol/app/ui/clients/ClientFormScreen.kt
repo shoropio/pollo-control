@@ -67,7 +67,7 @@ fun ClientFormScreen(
             TopAppBar(
                 title = { Text(if (isEditing) "Editar Cliente" else "Nuevo Cliente") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -83,7 +83,7 @@ fun ClientFormScreen(
                 OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
-                Button(onClick = click@{
+                Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
                     if (nombre.isBlank()) { nombreError = true; return@click }
                     viewModel.save(ClientEntity(
                         id = if (isEditing) clienteId else 0L,
@@ -97,6 +97,7 @@ fun ClientFormScreen(
                 if (isEditing) {
                     var showDeleteConfirm by remember { mutableStateOf(false) }
                     OutlinedButton(
+                        shape = androidx.compose.ui.graphics.RectangleShape,
                         onClick = { showDeleteConfirm = true },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)

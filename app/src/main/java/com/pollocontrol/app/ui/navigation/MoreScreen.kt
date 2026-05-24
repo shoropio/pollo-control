@@ -19,7 +19,9 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -61,6 +63,8 @@ fun MoreScreen(
     onNavigateToExpenses: () -> Unit,
     onNavigateToClients: () -> Unit,
     onNavigateToReports: () -> Unit,
+    onNavigateToQuailBatches: () -> Unit,
+    onNavigateToEggProduction: () -> Unit,
     onNavigateToBackupRestore: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onSync: suspend () -> Unit,
@@ -71,6 +75,8 @@ fun MoreScreen(
         MasMenuItem("Gastos", Icons.Default.AttachMoney, WarningOrange, onNavigateToExpenses),
         MasMenuItem("Clientes", Icons.Default.People, CoralAccent, onNavigateToClients),
         MasMenuItem("Reportes", Icons.Default.Assessment, BluePrimary, onNavigateToReports),
+        MasMenuItem("Codornices", Icons.Default.Pets, BluePrimary, onNavigateToQuailBatches),
+        MasMenuItem("Huevos", Icons.Default.Circle, WarningOrange, onNavigateToEggProduction),
         MasMenuItem("Copia de Seguridad", Icons.Default.Backup, BluePrimary, onNavigateToBackupRestore),
         MasMenuItem("Configuraciones", Icons.Default.Settings, BluePrimary, onNavigateToSettings),
     )

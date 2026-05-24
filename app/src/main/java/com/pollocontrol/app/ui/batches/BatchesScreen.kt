@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.pollocontrol.app.ui.batches
@@ -52,6 +57,7 @@ fun BatchesScreen(
         if (searchQuery.isBlank()) batches
         else batches.filter {
             it.nombre.contains(searchQuery, ignoreCase = true) ||
+            batchTypeLabel(it).contains(searchQuery, ignoreCase = true) ||
             it.raza.contains(searchQuery, ignoreCase = true) ||
             it.galpon.contains(searchQuery, ignoreCase = true)
         }
@@ -66,7 +72,7 @@ fun BatchesScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onNavigateToForm(0L) }) {
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { onNavigateToForm(0L) }) {
                 Icon(Icons.Default.Add, "Agregar Lote")
             }
         }
@@ -92,7 +98,7 @@ fun BatchesScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar por nombre, raza o galpon...") },
+                placeholder = { Text("Buscar por nombre, tipo, raza o galpon...") },
                 leadingIcon = { Icon(Icons.Default.Search, "Buscar") },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
@@ -150,9 +156,16 @@ private fun BatchCard(batch: BatchEntity, onClick: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(8.dp))
+            Text(
+                batchTypeLabel(batch),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 InfoItem("Edad", "$edad dias")
-                InfoItem("Inicial", "${batch.cantidadInicial}")
+                InfoItem("Aves", "${batch.cantidadInicial}")
                 InfoItem("Galpon", batch.galpon.ifBlank { "-" })
             }
             Spacer(Modifier.height(4.dp))
@@ -170,4 +183,11 @@ private fun InfoItem(label: String, value: String) {
         Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+private fun batchTypeLabel(batch: BatchEntity): String = when {
+    batch.especie == "CODORNIZ" -> "Codorniz"
+    batch.especie == "GALLINA" && batch.proposito == "HUEVOS" -> "Gallina ponedora"
+    batch.proposito == "HUEVOS" -> "Huevos"
+    else -> "Pollo de engorde"
 }

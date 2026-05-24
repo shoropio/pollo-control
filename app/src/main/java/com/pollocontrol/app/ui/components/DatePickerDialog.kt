@@ -14,7 +14,7 @@ fun PolloDatePickerDialog(
     DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                 datePickerState.selectedDateMillis?.let { onDateSelected(it) }
                 onDismiss()
             }) {
@@ -22,7 +22,7 @@ fun PolloDatePickerDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) {
                 Text("Cancelar")
             }
         }

@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 package com.pollocontrol.app.ui.sales
 
 import androidx.compose.foundation.layout.*
@@ -46,6 +51,12 @@ fun SalesScreen(
     val currency by app.settingsManager.currency.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
+
+    // ✅ Map precalculado para búsqueda eficiente
+    val batchMap = remember(batches) {
+        batches.associateBy { it.id }
+    }
+
     val filteredSales = remember(sales, searchQuery) {
         if (searchQuery.isBlank()) sales
         else sales.filter {
@@ -68,7 +79,7 @@ fun SalesScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
         }
     ) { padding ->
         PullToSyncBox(
@@ -106,7 +117,8 @@ fun SalesScreen(
             } else {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredSales, key = { it.id }) { venta ->
-                        val loteNombre = batches.find { it.id == venta.loteId }?.nombre ?: "General"
+                        // ✅ Usar Map precalculado en lugar de batches.find (O(1) vs O(n))
+                        val loteNombre = batchMap[venta.loteId]?.nombre ?: "General"
                         val date = remember(venta) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(venta.fecha)) }
                         Card(Modifier.fillMaxWidth()) {
                             Row(Modifier.padding(16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

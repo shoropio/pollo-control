@@ -75,7 +75,7 @@ fun BatchDetailScreen(
                 actions = {
                     IconButton(onClick = onNavigateToEdit) { Icon(Icons.Default.Edit, "Editar") }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary, actionIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface, actionIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         }
     ) { padding ->
@@ -86,6 +86,7 @@ fun BatchDetailScreen(
                 // Info cards
                 Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     DetailRow("Edad", "$edad días")
+                    DetailRow("Tipo", batch?.let { batchTypeLabel(it) } ?: "-")
                     DetailRow("Raza", batch?.raza?.ifBlank { "-" } ?: "-")
                     DetailRow("Galpón", batch?.galpon?.ifBlank { "-" } ?: "-")
                     DetailRow("Proveedor", batch?.proveedor?.ifBlank { "-" } ?: "-")
@@ -95,10 +96,10 @@ fun BatchDetailScreen(
 
                 Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Producción", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    DetailRow("Pollos Iniciales", "${batch?.cantidadInicial ?: 0}")
+                    DetailRow("Aves iniciales", "${batch?.cantidadInicial ?: 0}")
                     DetailRow("Mortalidad", "$mortalidadTotal")
-                    DetailRow("Pollos Vivos", "$pollosVivos", if (pollosVivos > 0) Color(0xFF388E3C) else Color(0xFFD32F2F))
-                    DetailRow("Costo/Pollito", formatMoney(batch?.precioPorPollito ?: 0.0, currency))
+                    DetailRow("Aves vivas", "$pollosVivos", if (pollosVivos > 0) Color(0xFF388E3C) else Color(0xFFD32F2F))
+                    DetailRow("Costo/Ave", formatMoney(batch?.precioPorPollito ?: 0.0, currency))
                 }}
 
                 Text("Gestión del Lote", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -132,9 +133,16 @@ private fun DetailRow(label: String, value: String, valueColor: Color = Material
 
 @Composable
 private fun ActionButton(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = color)) {
+    OutlinedButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onClick, modifier = Modifier.fillMaxWidth().height(56.dp), colors = ButtonDefaults.outlinedButtonColors(contentColor = color)) {
         Icon(icon, text, modifier = Modifier.size(24.dp))
         Spacer(Modifier.width(12.dp))
         Text(text, fontWeight = FontWeight.Medium)
     }
+}
+
+private fun batchTypeLabel(batch: com.pollocontrol.app.data.local.entity.BatchEntity): String = when {
+    batch.especie == "CODORNIZ" -> "Codorniz"
+    batch.especie == "GALLINA" && batch.proposito == "HUEVOS" -> "Gallina ponedora"
+    batch.proposito == "HUEVOS" -> "Huevos"
+    else -> "Pollo de engorde"
 }

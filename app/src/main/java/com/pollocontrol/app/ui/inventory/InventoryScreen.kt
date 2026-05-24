@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 @file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.pollocontrol.app.ui.inventory
@@ -64,7 +69,7 @@ fun InventoryScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { onNavigateToForm(0L) }) { Icon(Icons.Default.Add, "Agregar") }
         }
     ) { padding ->
         PullToSyncBox(

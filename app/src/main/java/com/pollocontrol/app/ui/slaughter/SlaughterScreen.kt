@@ -65,11 +65,11 @@ fun SlaughterScreen(
             TopAppBar(
                 title = { Text("Sacrificio - ${lote?.nombre ?: ""}") },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary, titleContentColor = MaterialTheme.colorScheme.onPrimary, navigationIconContentColor = MaterialTheme.colorScheme.onPrimary)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { editingRecord = SlaughterEntity(loteId = batchId, fecha = System.currentTimeMillis(), cantidad = 0, pesoVivoPromedio = 0.0, pesoCanalPromedio = 0.0) }) { Icon(Icons.Default.Add, "Registrar") }
+            FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { editingRecord = SlaughterEntity(loteId = batchId, fecha = System.currentTimeMillis(), cantidad = 0, pesoVivoPromedio = 0.0, pesoCanalPromedio = 0.0) }) { Icon(Icons.Default.Add, "Registrar") }
         }
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
@@ -160,7 +160,7 @@ private fun SlaughterFormDialog(loteId: Long, initial: SlaughterEntity? = null, 
             }
         },
         confirmButton = {
-            TextButton(onClick = {
+            TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                 if (cantidad.isBlank() || cantidad.toIntOrNull() == null || cantidad.toInt() <= 0) { cantError = true; return@TextButton }
                 val pVivo = pesoVivo.toDoubleOrNull() ?: 0.0
                 val pCanal = pesoCanal.toDoubleOrNull() ?: 0.0
@@ -174,7 +174,7 @@ private fun SlaughterFormDialog(loteId: Long, initial: SlaughterEntity? = null, 
                 ))
             }) { Text(if (isEditing) "Actualizar" else "Guardar") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = onDismiss) { Text("Cancelar") } }
     )
     if (showDatePicker) { PolloDatePickerDialog(onDateSelected = { fecha = it }, onDismiss = { showDatePicker = false }) }
 }

@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 package com.pollocontrol.app
 
 import android.app.Application
@@ -25,6 +30,10 @@ class PolloControlApp : Application() {
     val saleRepository by lazy { SaleRepositoryImpl(database.saleDao(), database.syncTombstoneDao()) }
     val clientRepository by lazy { ClientRepositoryImpl(database.clientDao(), database.syncTombstoneDao()) }
     val supplyMovementRepository by lazy { SupplyMovementRepositoryImpl(database.supplyMovementDao(), database.syncTombstoneDao()) }
+
+    // ✅ Repositories para Codornices y Huevos
+    val quailBatchRepository by lazy { QuailBatchRepositoryImpl(database.quailBatchDao(), database.syncTombstoneDao()) }
+    val eggProductionRepository by lazy { EggProductionRepositoryImpl(database.eggProductionDao(), database.syncTombstoneDao()) }
 
     val firebaseSyncManager by lazy { FirebaseSyncManager(this) }
 }

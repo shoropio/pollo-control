@@ -12,5 +12,7 @@ object SyncCollections {
     const val WEIGHING = "pesajes"
     const val SLAUGHTER = "sacrificios"
     const val SALES = "ventas"
+    const val QUAIL_BATCHES = "lotes_codornices"
+    const val EGG_PRODUCTION = "produccion_huevos"
     const val TOMBSTONES = "tombstones"
 }

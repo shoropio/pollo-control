@@ -41,6 +41,8 @@ sealed class Screen(val route: String, val title: String) {
         fun createRoute(clienteId: Long = 0L) = if (clienteId == 0L) "clients/form/0" else "clients/form/$clienteId"
     }
     data object Reports : Screen("reports", "Reportes")
+    data object QuailBatches : Screen("quail_batches", "Codornices")
+    data object EggProduction : Screen("egg_production", "Huevos")
     data object More : Screen("more", "Más")
     data object Settings : Screen("settings", "Configuraciones")
     data object BackupRestore : Screen("backup_restore", "Copia de Seguridad")

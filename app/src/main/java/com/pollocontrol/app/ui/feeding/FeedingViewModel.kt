@@ -1,3 +1,8 @@
+/*
+ * Copyright © 2026. Shoropio Corporation
+ * Todos los derechos reservados.
+ */
+
 package com.pollocontrol.app.ui.feeding
 
 import android.app.Application
@@ -6,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.FeedingEntity
 import com.pollocontrol.app.data.local.entity.BatchEntity
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -25,11 +31,15 @@ class FeedingViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadBatch(batchId: Long) {
         viewModelScope.launch {
-            _batch.value = batchRepo.getById(batchId)
-            repo.getByBatch(batchId).collect { _records.value = it }
-        }
-        viewModelScope.launch {
-            _totalConsumption.value = repo.getTotalByBatch(batchId)
+            // ✅ Ejecutar todas las queries en paralelo de forma sincronizada
+            val batchDeferred = async { batchRepo.getById(batchId) }
+            val recordsDeferred = async { repo.getByBatch(batchId).first() }
+            val totalDeferred = async { repo.getTotalByBatch(batchId) }
+
+            // Esperar todos los resultados
+            _batch.value = batchDeferred.await()
+            _records.value = recordsDeferred.await()
+            _totalConsumption.value = totalDeferred.await()
         }
     }
 
