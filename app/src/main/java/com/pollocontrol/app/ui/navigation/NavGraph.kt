@@ -1,12 +1,20 @@
 package com.pollocontrol.app.ui.navigation
 
+import android.os.SystemClock
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.pollocontrol.app.PolloControlApp
@@ -42,6 +50,15 @@ fun PolloControlNavGraph(
 ) {
     val app = LocalContext.current.applicationContext as PolloControlApp
     val scope = rememberCoroutineScope()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    var lastNavigationMark by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+
+    LaunchedEffect(backStackEntry?.destination?.route) {
+        val route = backStackEntry?.destination?.route ?: return@LaunchedEffect
+        val now = SystemClock.elapsedRealtime()
+        Log.d("NavigationProfile", "route=$route elapsedSinceLast=${now - lastNavigationMark}ms")
+        lastNavigationMark = now
+    }
 
     NavHost(navController = navController, startDestination = Screen.Dashboard.route) {
         composable(Screen.Dashboard.route) {

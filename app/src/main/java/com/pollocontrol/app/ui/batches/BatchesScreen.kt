@@ -111,7 +111,7 @@ fun BatchesScreen(
 
             if (filteredAndSearched.isEmpty()) {
                 PolloEmptyState(
-                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay batches registrados",
+                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay lotes registrados",
                     subtitle = if (searchQuery.isNotBlank()) "Intente con otros terminos" else "Agregue un lote usando el boton +"
                 )
             } else {

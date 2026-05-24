@@ -7,17 +7,24 @@ package com.pollocontrol.app
 
 import android.app.Application
 import com.pollocontrol.app.data.auth.AuthManager
+import com.pollocontrol.app.data.cache.AppDataCache
 import com.pollocontrol.app.data.local.PolloControlDatabase
 import com.pollocontrol.app.data.repository.*
 import com.pollocontrol.app.data.settings.SettingsManager
 import com.pollocontrol.app.data.sync.FirebaseSyncManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class PolloControlApp : Application() {
+
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     val authManager by lazy { AuthManager(this) }
     val settingsManager by lazy { SettingsManager(this) }
 
     val database by lazy { PolloControlDatabase.getDatabase(this) }
+    val dataCache by lazy { AppDataCache(database, applicationScope) }
 
     val batchRepository by lazy { BatchRepositoryImpl(database.batchDao(), database.syncTombstoneDao()) }
     val mortalityRepository by lazy { MortalityRepositoryImpl(database.mortalityDao(), database.syncTombstoneDao()) }
