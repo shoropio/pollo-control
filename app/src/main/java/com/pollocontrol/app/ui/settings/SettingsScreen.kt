@@ -51,9 +51,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.data.sync.SyncStatus
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.theme.BluePrimary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,14 +61,16 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun SettingsScreen(
-    app: PolloControlApp,
     onNavigateBack: () -> Unit,
     onSignOut: () -> Unit
 ) {
-    val currency by app.settingsManager.currency.collectAsState()
-    val currentUser by app.authManager.currentUser.collectAsState()
-    val syncStatus by app.firebaseSyncManager.syncStatus.collectAsState()
-    val syncResult by app.firebaseSyncManager.lastSyncResult.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val authManager = LocalAppDependencies.current.authManager
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
+    val currency by settingsManager.currency.collectAsState()
+    val currentUser by authManager.currentUser.collectAsState()
+    val syncStatus by firebaseSyncManager.syncStatus.collectAsState()
+    val syncResult by firebaseSyncManager.lastSyncResult.collectAsState()
     val scope = rememberCoroutineScope()
     var isSyncing by remember { mutableStateOf(false) }
 
@@ -98,7 +100,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             SettingsSectionTitle("Preferencias")
-            CurrencySettingCard(currency, app.settingsManager::setCurrency)
+            CurrencySettingCard(currency, settingsManager::setCurrency)
 
             SettingsSectionTitle("Cuenta")
             Card(
@@ -170,7 +172,7 @@ fun SettingsScreen(
                             isSyncing = true
                             scope.launch {
                                 withContext(Dispatchers.IO) {
-                                    app.firebaseSyncManager.syncAll()
+                                    firebaseSyncManager.syncAll()
                                 }
                                 isSyncing = false
                             }

@@ -16,29 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.ClientEntity
 import com.pollocontrol.app.data.settings.AppCurrency
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.settings.formatMoney
 
 @Composable
 fun ClientsScreen(
-    app: PolloControlApp,
     onNavigateBack: () -> Unit,
     onNavigateToForm: (Long) -> Unit
 ) {
-    val viewModel: ClientsViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = ClientsViewModel(app) as T
-        }
-    )
+    val viewModel: ClientsViewModel = hiltViewModel()
     val searchResults by viewModel.searchResults.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
     var query by remember { mutableStateOf("") }
 
     Scaffold(

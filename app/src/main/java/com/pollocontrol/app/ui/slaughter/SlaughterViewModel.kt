@@ -1,18 +1,21 @@
 package com.pollocontrol.app.ui.slaughter
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.SlaughterEntity
+import com.pollocontrol.app.domain.repository.BatchRepository
+import com.pollocontrol.app.domain.repository.SlaughterRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SlaughterViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val repo = app.slaughterRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class SlaughterViewModel @Inject constructor(
+    private val slaughterRepository: SlaughterRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
     private val _batch = MutableStateFlow<BatchEntity?>(null)
     val batch: StateFlow<BatchEntity?> = _batch.asStateFlow()
@@ -25,24 +28,24 @@ class SlaughterViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun loadBatch(batchId: Long) {
         viewModelScope.launch {
-            _batch.value = batchRepo.getById(batchId)
-            repo.getByBatch(batchId).collect { _records.value = it }
+            _batch.value = batchRepository.getById(batchId)
+            slaughterRepository.getByBatch(batchId).collect { _records.value = it }
         }
         viewModelScope.launch {
-            _totalSlaughtered.value = repo.getTotalByBatch(batchId)
+            _totalSlaughtered.value = slaughterRepository.getTotalByBatch(batchId)
         }
     }
 
     fun save(record: SlaughterEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (record.id == 0L) repo.insert(record) else repo.update(record)
+            if (record.id == 0L) slaughterRepository.insert(record) else slaughterRepository.update(record)
             onSuccess()
         }
     }
 
     fun delete(record: SlaughterEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            repo.delete(record)
+            slaughterRepository.delete(record)
             onSuccess()
         }
     }

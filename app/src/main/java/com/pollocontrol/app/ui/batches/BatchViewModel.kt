@@ -1,18 +1,20 @@
 package com.pollocontrol.app.ui.batches
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
-import com.pollocontrol.app.data.local.entity.*
+import com.pollocontrol.app.data.local.entity.BatchEntity
+import com.pollocontrol.app.domain.repository.BatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BatchViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val repo = app.batchRepository
+@HiltViewModel
+class BatchViewModel @Inject constructor(
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
-    val batches: StateFlow<List<BatchEntity>> = repo.getAll()
+    val batches: StateFlow<List<BatchEntity>> = batchRepository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _filter = MutableStateFlow("TODOS")
@@ -23,19 +25,19 @@ class BatchViewModel(application: Application) : AndroidViewModel(application) {
     fun setFilter(filter: String) { _filter.value = filter }
 
     fun getById(id: Long, onResult: (BatchEntity?) -> Unit) {
-        viewModelScope.launch { onResult(repo.getById(id)) }
+        viewModelScope.launch { onResult(batchRepository.getById(id)) }
     }
 
     fun save(batch: BatchEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (batch.id == 0L) repo.insert(batch) else repo.update(batch)
+            if (batch.id == 0L) batchRepository.insert(batch) else batchRepository.update(batch)
             onSuccess()
         }
     }
 
     fun delete(batch: BatchEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            repo.delete(batch)
+            batchRepository.delete(batch)
             onSuccess()
         }
     }

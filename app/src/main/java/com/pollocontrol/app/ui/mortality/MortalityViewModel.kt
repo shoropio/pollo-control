@@ -1,18 +1,21 @@
 package com.pollocontrol.app.ui.mortality
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.MortalityEntity
+import com.pollocontrol.app.domain.repository.BatchRepository
+import com.pollocontrol.app.domain.repository.MortalityRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MortalityViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val mortalityRepo = app.mortalityRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class MortalityViewModel @Inject constructor(
+    private val mortalityRepository: MortalityRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
     private val _batch = MutableStateFlow<BatchEntity?>(null)
     val batch: StateFlow<BatchEntity?> = _batch.asStateFlow()
@@ -25,13 +28,13 @@ class MortalityViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun loadBatch(batchId: Long) {
         viewModelScope.launch {
-            _batch.value = batchRepo.getById(batchId)
-            mortalityRepo.getByBatch(batchId).collect { list ->
+            _batch.value = batchRepository.getById(batchId)
+            mortalityRepository.getByBatch(batchId).collect { list ->
                 _mortalityRecords.value = list
             }
         }
         viewModelScope.launch {
-            mortalityRepo.getTotalByBatchFlow(batchId).collect { total ->
+            mortalityRepository.getTotalByBatchFlow(batchId).collect { total ->
                 _totalMortality.value = total
             }
         }
@@ -41,14 +44,14 @@ class MortalityViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun save(mortality: MortalityEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (mortality.id == 0L) mortalityRepo.insert(mortality) else mortalityRepo.update(mortality)
+            if (mortality.id == 0L) mortalityRepository.insert(mortality) else mortalityRepository.update(mortality)
             onSuccess()
         }
     }
 
     fun delete(mortality: MortalityEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            mortalityRepo.delete(mortality)
+            mortalityRepository.delete(mortality)
             onSuccess()
         }
     }

@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
@@ -17,7 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.dashboard.DashboardScreen
 import com.pollocontrol.app.ui.batches.BatchesScreen
 import com.pollocontrol.app.ui.batches.BatchDetailScreen
@@ -48,7 +49,7 @@ import kotlinx.coroutines.launch
 fun PolloControlNavGraph(
     navController: NavHostController = rememberNavController()
 ) {
-    val app = LocalContext.current.applicationContext as PolloControlApp
+    val deps = LocalAppDependencies.current
     val scope = rememberCoroutineScope()
     val backStackEntry by navController.currentBackStackEntryAsState()
     var lastNavigationMark by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
@@ -63,7 +64,6 @@ fun PolloControlNavGraph(
     NavHost(navController = navController, startDestination = Screen.Dashboard.route) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(
-                app = app,
                 navController = navController,
                 onNavigateToBatches = { navController.navigate(Screen.Batches.route) { popUpTo(Screen.Dashboard.route) { saveState = true }; launchSingleTop = true; restoreState = true } },
                 onNavigateToInventory = { navController.navigate(Screen.Inventory.route) { popUpTo(Screen.Dashboard.route) { saveState = true }; launchSingleTop = true; restoreState = true } },
@@ -77,7 +77,6 @@ fun PolloControlNavGraph(
 
         composable(Screen.Batches.route) {
             BatchesScreen(
-                app = app,
                 navController = navController,
                 onNavigateToDetail = { batchId -> navController.navigate(Screen.BatchDetail.createRoute(batchId)) },
                 onNavigateToForm = { batchId -> navController.navigate(Screen.BatchForm.createRoute(batchId)) }
@@ -91,7 +90,6 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             BatchDetailScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToMortality = { navController.navigate(Screen.Mortality.createRoute(loteId)) },
                 onNavigateToFeeding = { navController.navigate(Screen.Feeding.createRoute(loteId)) },
@@ -109,7 +107,6 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             BatchFormScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -121,14 +118,12 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             MortalityScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.Inventory.route) {
             InventoryScreen(
-                app = app,
                 navController = navController,
                 onNavigateToForm = { insumoId -> navController.navigate(Screen.InventoryForm.createRoute(insumoId)) }
             )
@@ -141,7 +136,6 @@ fun PolloControlNavGraph(
             val insumoId = backStackEntry.arguments?.getLong("insumoId") ?: 0L
             InventoryFormScreen(
                 insumoId = insumoId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -153,14 +147,12 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             FeedingScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.Expenses.route) {
             ExpensesScreen(
-                app = app,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = { gastoId -> navController.navigate(Screen.ExpenseForm.createRoute(gastoId)) }
             )
@@ -173,7 +165,6 @@ fun PolloControlNavGraph(
             val gastoId = backStackEntry.arguments?.getLong("gastoId") ?: 0L
             ExpenseFormScreen(
                 gastoId = gastoId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -185,7 +176,6 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             HealthScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -197,7 +187,6 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             WeighingScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -209,20 +198,19 @@ fun PolloControlNavGraph(
             val loteId = backStackEntry.arguments?.getLong("loteId") ?: 0L
             SlaughterScreen(
                 batchId = loteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.Sales.route) {
             SalesScreen(
-                app = app,
                 navController = navController,
                 onNavigateToForm = { ventaId -> navController.navigate(Screen.SaleForm.createRoute(ventaId)) }
             )
         }
 
         composable(Screen.More.route) {
+            val currentUser by deps.authManager.currentUser.collectAsState()
             MoreScreen(
                 navController = navController,
                 onNavigateToExpenses = { navController.navigate(Screen.Expenses.route) },
@@ -232,17 +220,16 @@ fun PolloControlNavGraph(
                 onNavigateToEggProduction = { navController.navigate(Screen.EggProduction.route) },
                 onNavigateToBackupRestore = { navController.navigate(Screen.BackupRestore.route) },
                 onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
-                onSync = { app.firebaseSyncManager.syncAll() },
-                currentUser = app.authManager.currentUser.value,
-                onSignOut = { scope.launch { app.authManager.signOut() } }
+                onSync = { deps.firebaseSyncManager.syncAll() },
+                currentUser = currentUser,
+                onSignOut = { scope.launch { deps.authManager.signOut() } }
             )
         }
 
         composable(Screen.Settings.route) {
             SettingsScreen(
-                app = app,
                 onNavigateBack = { navController.popBackStack() },
-                onSignOut = { scope.launch { app.authManager.signOut() } }
+                onSignOut = { scope.launch { deps.authManager.signOut() } }
             )
         }
 
@@ -253,14 +240,12 @@ fun PolloControlNavGraph(
             val ventaId = backStackEntry.arguments?.getLong("ventaId") ?: 0L
             SaleFormScreen(
                 ventaId = ventaId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.Clients.route) {
             ClientsScreen(
-                app = app,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToForm = { clienteId -> navController.navigate(Screen.ClientForm.createRoute(clienteId)) }
             )
@@ -273,35 +258,30 @@ fun PolloControlNavGraph(
             val clienteId = backStackEntry.arguments?.getLong("clienteId") ?: 0L
             ClientFormScreen(
                 clienteId = clienteId,
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.Reports.route) {
             ReportsScreen(
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
         composable(Screen.QuailBatches.route) {
             QuailBatchesScreen(
-                app = app,
                 navController = navController
             )
         }
 
         composable(Screen.EggProduction.route) {
             EggProductionScreen(
-                app = app,
                 navController = navController
             )
         }
 
         composable(Screen.BackupRestore.route) {
             BackupRestoreScreen(
-                app = app,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

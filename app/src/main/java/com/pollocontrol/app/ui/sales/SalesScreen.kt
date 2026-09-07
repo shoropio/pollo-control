@@ -18,12 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.ConfirmDialog
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.components.PullToSyncBox
@@ -35,24 +33,19 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesScreen(
-    app: PolloControlApp,
     navController: NavHostController,
     onNavigateToForm: (Long) -> Unit
 ) {
-    val viewModel: SalesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = SalesViewModel(app) as T
-        }
-    )
+    val viewModel: SalesViewModel = hiltViewModel()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
     val sales by viewModel.sales.collectAsState()
     val totalSales by viewModel.totalSales.collectAsState()
     val batches by viewModel.batches.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val currency by settingsManager.currency.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
 
-    // ✅ Map precalculado para búsqueda eficiente
     val batchMap = remember(batches) {
         batches.associateBy { it.id }
     }
@@ -83,7 +76,7 @@ fun SalesScreen(
         }
     ) { padding ->
         PullToSyncBox(
-            onSync = { app.firebaseSyncManager.syncAll() },
+            onSync = { firebaseSyncManager.syncAll() },
             modifier = Modifier.padding(padding)
         ) {
             Column(Modifier.fillMaxSize()) {
@@ -117,7 +110,6 @@ fun SalesScreen(
             } else {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(filteredSales, key = { it.id }) { venta ->
-                        // ✅ Usar Map precalculado en lugar de batches.find (O(1) vs O(n))
                         val loteNombre = batchMap[venta.loteId]?.nombre ?: "General"
                         val date = remember(venta) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(venta.fecha)) }
                         Card(Modifier.fillMaxWidth()) {

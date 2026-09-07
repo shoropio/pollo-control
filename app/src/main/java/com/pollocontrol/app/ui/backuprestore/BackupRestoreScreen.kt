@@ -15,25 +15,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.ui.theme.BluePrimary
 import com.pollocontrol.app.ui.theme.WarningOrange
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupRestoreScreen(
-    app: PolloControlApp,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: BackupRestoreViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = BackupRestoreViewModel(app) as T
-        }
-    )
+    val viewModel: BackupRestoreViewModel = hiltViewModel()
 
     val isLoading by viewModel.isLoading.collectAsState()
     val message by viewModel.message.collectAsState()

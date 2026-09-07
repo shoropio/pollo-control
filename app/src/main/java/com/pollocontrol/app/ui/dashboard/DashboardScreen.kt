@@ -13,23 +13,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.ui.components.KpiCard
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.MiniLineChart
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.ui.settings.formatMoney
 import com.pollocontrol.app.ui.theme.*
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("UNUSED_PARAMETER")
 @Composable
 fun DashboardScreen(
-    app: PolloControlApp,
     navController: NavHostController,
     onNavigateToBatches: () -> Unit,
     onNavigateToInventory: () -> Unit,
@@ -39,21 +38,18 @@ fun DashboardScreen(
     onNavigateToReports: () -> Unit,
     onNavigateToBatchDetail: (Long) -> Unit
 ) {
-    val viewModel: DashboardViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = DashboardViewModel(app) as T
-        }
-    )
+    val viewModel: DashboardViewModel = hiltViewModel()
     val stats by viewModel.stats.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
 
     Scaffold(
         bottomBar = { PolloBottomNavBar(navController) },
         topBar = {
             TopAppBar(
-                title = { Text("PolloControl") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     Text(
                         text = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault()).format(java.util.Date()),
@@ -70,7 +66,7 @@ fun DashboardScreen(
     ) { padding ->
         PullToSyncBox(
             onSync = {
-                app.firebaseSyncManager.syncAll()
+                firebaseSyncManager.syncAll()
                 viewModel.loadDashboard(forceRefresh = true)
             },
             modifier = Modifier.padding(padding)
@@ -84,13 +80,13 @@ fun DashboardScreen(
             ) {
             // Header
             Text(
-                text = "Buenos dias",
+                text = stringResource(R.string.buenos_dias),
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "Resumen general de tu granja",
+                text = stringResource(R.string.resumen_general_granja),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -106,14 +102,14 @@ fun DashboardScreen(
             } else {
                 // KPI Grid - compact 3 columns
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    KpiCard("Lotes", stats.activeLotes.toString(), Icons.Default.Agriculture, BluePrimary, Modifier.weight(1f))
-                    KpiCard("Vivos", stats.totalLiveChickens.toString(), Icons.Default.Face, StatusPositive, Modifier.weight(1f))
-                    KpiCard("Mort.", stats.totalMortality.toString(), Icons.Default.Warning, StatusNegative, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.lotes), stats.activeLotes.toString(), Icons.Default.Agriculture, BluePrimary, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.vivos), stats.totalLiveChickens.toString(), Icons.Default.Face, StatusPositive, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.mort), stats.totalMortality.toString(), Icons.Default.Warning, StatusNegative, Modifier.weight(1f))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    KpiCard("Ventas", formatMoney(stats.totalSales, currency, decimals = 0), Icons.Default.ShoppingCart, StatusInfo, Modifier.weight(1f))
-                    KpiCard("Gastos", formatMoney(stats.totalExpenses, currency, decimals = 0), Icons.Default.AttachMoney, StatusWarning, Modifier.weight(1f))
-                    KpiCard("Ganancia", formatMoney(stats.estimatedProfit, currency, decimals = 0), Icons.Default.AccountBalance, if (stats.estimatedProfit >= 0) StatusPositive else StatusNegative, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.ventas), formatMoney(stats.totalSales, currency, decimals = 0), Icons.Default.ShoppingCart, StatusInfo, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.gastos), formatMoney(stats.totalExpenses, currency, decimals = 0), Icons.Default.AttachMoney, StatusWarning, Modifier.weight(1f))
+                    KpiCard(stringResource(R.string.ganancia), formatMoney(stats.estimatedProfit, currency, decimals = 0), Icons.Default.AccountBalance, if (stats.estimatedProfit >= 0) StatusPositive else StatusNegative, Modifier.weight(1f))
                 }
 
                 // Chart
@@ -129,34 +125,34 @@ fun DashboardScreen(
 
                 // Quick Actions
                 Text(
-                    "Acceso Rapido",
+                    stringResource(R.string.acceso_rapido),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuickActionCard("Lotes", Icons.Default.Agriculture, BluePrimary, onNavigateToBatches, Modifier.weight(1f))
-                    QuickActionCard("Inventario", Icons.Default.Inventory2, StatusPositive, onNavigateToInventory, Modifier.weight(1f))
-                    QuickActionCard("Ventas", Icons.Default.ShoppingCart, StatusInfo, onNavigateToSales, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.lotes), Icons.Default.Agriculture, BluePrimary, onNavigateToBatches, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.inventario), Icons.Default.Inventory2, StatusPositive, onNavigateToInventory, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.ventas), Icons.Default.ShoppingCart, StatusInfo, onNavigateToSales, Modifier.weight(1f))
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    QuickActionCard("Gastos", Icons.Default.AttachMoney, StatusWarning, onNavigateToExpenses, Modifier.weight(1f))
-                    QuickActionCard("Clientes", Icons.Default.People, AccentRose, onNavigateToClients, Modifier.weight(1f))
-                    QuickActionCard("Reportes", Icons.Default.Assessment, AccentGreen, onNavigateToReports, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.gastos), Icons.Default.AttachMoney, StatusWarning, onNavigateToExpenses, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.clientes), Icons.Default.People, AccentRose, onNavigateToClients, Modifier.weight(1f))
+                    QuickActionCard(stringResource(R.string.reportes), Icons.Default.Assessment, AccentGreen, onNavigateToReports, Modifier.weight(1f))
                 }
 
                 // Alerts
                 if (stats.lowStockItems > 0 || stats.mortalityRate > 10 || stats.pendingPayments > 0) {
                     Text(
-                        "Alertas",
+                        stringResource(R.string.alertas_titulo),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     if (stats.lowStockItems > 0)
-                        AlertCard("${stats.lowStockItems} insumos con stock bajo", StatusWarning, Icons.Default.Inventory2)
+                        AlertCard(stringResource(R.string.insumos_stock_bajo, stats.lowStockItems), StatusWarning, Icons.Default.Inventory2)
                     if (stats.mortalityRate > 10)
-                        AlertCard("Mortalidad: ${String.format("%.1f", stats.mortalityRate)}%", StatusNegative, Icons.Default.Warning)
+                        AlertCard(stringResource(R.string.mortalidad_formato, String.format("%.1f", stats.mortalityRate)), StatusNegative, Icons.Default.Warning)
                     if (stats.pendingPayments > 0)
-                        AlertCard("${stats.pendingPayments} pagos pendientes", StatusInfo, Icons.Default.Payment)
+                        AlertCard(stringResource(R.string.pagos_pendientes, stats.pendingPayments), StatusInfo, Icons.Default.Payment)
                 }
             }
             }

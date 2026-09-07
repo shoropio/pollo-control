@@ -13,30 +13,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.SaleEntity
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
 import java.text.SimpleDateFormat
 import java.util.*
 @Composable
 fun SaleFormScreen(
     ventaId: Long,
-    app: PolloControlApp,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: SalesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = SalesViewModel(app) as T
-        }
-    )
+    val viewModel: SalesViewModel = hiltViewModel()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
     val isEditing = ventaId != 0L
     val batches by viewModel.batches.collectAsState()
     val clients by viewModel.clients.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
 
     var tipo by remember { mutableStateOf("SACRIFICADO") }
     var modalidad by remember { mutableStateOf("UNIDAD") }

@@ -14,33 +14,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
 import com.pollocontrol.app.data.settings.AppCurrency
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.settings.formatMoney
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun ExpensesScreen(
-    app: PolloControlApp,
     onNavigateBack: () -> Unit,
     onNavigateToForm: (Long) -> Unit
 ) {
-    val viewModel: ExpensesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = ExpensesViewModel(app) as T
-        }
-    )
+    val viewModel: ExpensesViewModel = hiltViewModel()
     val expenses by viewModel.expenses.collectAsState()
     val totalExpenses by viewModel.totalExpenses.collectAsState()
     val batchMap by viewModel.batchMap.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
 
     var searchQuery by remember { mutableStateOf("") }
     val filteredExpenses = remember(expenses, searchQuery) {
@@ -54,7 +49,7 @@ fun ExpensesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gastos") },
+                title = { Text(stringResource(R.string.gastos)) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atras") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
@@ -66,16 +61,16 @@ fun ExpensesScreen(
         Column(Modifier.fillMaxSize().padding(padding)) {
             Card(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Total Gastos", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.total_gastos), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(formatMoney(totalExpenses, currency), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-                    Text("${filteredExpenses.size} registros", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.registros_formato, filteredExpenses.size), style = MaterialTheme.typography.bodySmall)
                 }
             }
 
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar por descripcion o tipo...") },
+                placeholder = { Text(stringResource(R.string.buscar_gastos_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Search, "Buscar") },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
@@ -88,8 +83,8 @@ fun ExpensesScreen(
 
             if (filteredExpenses.isEmpty()) {
                 PolloEmptyState(
-                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay gastos registrados",
-                    subtitle = if (searchQuery.isNotBlank()) "Intente con otros terminos" else "Agregue un gasto usando el boton +"
+                    title = if (searchQuery.isNotBlank()) stringResource(R.string.sin_resultados) else stringResource(R.string.no_hay_gastos),
+                    subtitle = if (searchQuery.isNotBlank()) stringResource(R.string.intente_otros_terminos) else stringResource(R.string.agregue_gasto_boton)
                 )
             } else {
                 LazyColumn(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -112,9 +107,9 @@ private fun GastoCard(gasto: ExpenseEntity, batchMap: Map<Long, String>, currenc
                 Text(gasto.tipo.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
                 Text(date, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (gasto.loteId != null && batchMap.containsKey(gasto.loteId)) {
-                    Text("Lote: ${batchMap[gasto.loteId]}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.lote_formato, batchMap[gasto.loteId] ?: ""), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 } else if (gasto.loteId == null) {
-                    Text("Gasto General", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.gasto_general), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Text(formatMoney(gasto.monto, currency), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)

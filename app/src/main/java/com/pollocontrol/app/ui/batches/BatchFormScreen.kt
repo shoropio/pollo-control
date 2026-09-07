@@ -13,27 +13,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.ui.components.ConfirmDialog
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 import java.text.SimpleDateFormat
 import java.util.*
 @Composable
 fun BatchFormScreen(
     batchId: Long,
-    app: PolloControlApp,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: BatchViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = BatchViewModel(app) as T
-        }
-    )
+    val viewModel: BatchViewModel = hiltViewModel()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
     val isEditing = batchId != 0L
 
     var nombre by remember { mutableStateOf("") }
@@ -52,7 +48,6 @@ fun BatchFormScreen(
     var cantidadError by remember { mutableStateOf(false) }
     var precioError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(isEditing) }
-    val currency by app.settingsManager.currency.collectAsState()
 
     LaunchedEffect(batchId) {
         if (isEditing) {
@@ -88,7 +83,7 @@ fun BatchFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Editar Lote" else "Nuevo Lote") },
+                title = { Text(if (isEditing) stringResource(R.string.editar_lote) else stringResource(R.string.nuevo_lote)) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
@@ -99,16 +94,16 @@ fun BatchFormScreen(
         } else {
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-                OutlinedTextField(value = nombre, onValueChange = { nombre = it; nombreError = false }, label = { Text("Nombre del Lote *") }, isError = nombreError, supportingText = if (nombreError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = nombre, onValueChange = { nombre = it; nombreError = false }, label = { Text(stringResource(R.string.nombre_lote_label)) }, isError = nombreError, supportingText = if (nombreError) {{ Text(stringResource(R.string.campo_requerido))}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text("Fecha de Ingreso") }, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Seleccionar fecha") } })
+                OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text(stringResource(R.string.fecha_ingreso_label)) }, modifier = Modifier.fillMaxWidth(), readOnly = true, trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Seleccionar fecha") } })
 
                 ExposedDropdownMenuBox(expanded = tipoExpanded, onExpandedChange = { tipoExpanded = !tipoExpanded }) {
                     OutlinedTextField(
                         value = selectedBatchType.label,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Tipo de lote") },
+                        label = { Text(stringResource(R.string.tipo_lote_label)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tipoExpanded) },
                         modifier = Modifier.fillMaxWidth().menuAnchor()
                     )
@@ -125,19 +120,19 @@ fun BatchFormScreen(
                     }
                 }
 
-                OutlinedTextField(value = cantidadInicial, onValueChange = { cantidadInicial = it; cantidadError = false }, label = { Text("Cantidad inicial de aves *") }, isError = cantidadError, supportingText = if (cantidadError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = cantidadInicial, onValueChange = { cantidadInicial = it; cantidadError = false }, label = { Text(stringResource(R.string.cantidad_inicial_aves)) }, isError = cantidadError, supportingText = if (cantidadError) {{ Text(stringResource(R.string.campo_requerido))}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text("Precio unitario por ave *") }, isError = precioError, supportingText = if (precioError) {{ Text("Campo requerido")}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
+                OutlinedTextField(value = precioPorPollito, onValueChange = { precioPorPollito = it; precioError = false }, label = { Text(stringResource(R.string.precio_unitario_ave)) }, isError = precioError, supportingText = if (precioError) {{ Text(stringResource(R.string.campo_requerido))}} else null, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
-                OutlinedTextField(value = raza, onValueChange = { raza = it }, label = { Text("Raza / Línea Genética") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = raza, onValueChange = { raza = it }, label = { Text(stringResource(R.string.raza_linea_genetica)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                OutlinedTextField(value = galpon, onValueChange = { galpon = it }, label = { Text("Galpón / Ubicación") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = galpon, onValueChange = { galpon = it }, label = { Text(stringResource(R.string.galpon_ubicacion)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
-                OutlinedTextField(value = proveedor, onValueChange = { proveedor = it }, label = { Text("Proveedor") }, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = proveedor, onValueChange = { proveedor = it }, label = { Text(stringResource(R.string.proveedor)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
                 // Estado dropdown
                 ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
-                    OutlinedTextField(value = estado, onValueChange = {}, readOnly = true, label = { Text("Estado") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
+                    OutlinedTextField(value = estado, onValueChange = {}, readOnly = true, label = { Text(stringResource(R.string.estado)) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
                     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         estados.forEach { e ->
                             DropdownMenuItem(text = { Text(e.lowercase().replaceFirstChar { it.uppercase() }) }, onClick = { estado = e; expanded = false })
@@ -145,7 +140,7 @@ fun BatchFormScreen(
                     }
                 }
 
-                OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+                OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text(stringResource(R.string.observaciones)) }, modifier = Modifier.fillMaxWidth(), minLines = 3)
 
                 Spacer(Modifier.height(8.dp))
 
@@ -171,7 +166,7 @@ fun BatchFormScreen(
                         observaciones = observaciones
                     )) { onNavigateBack() }
                 }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                    Text("Guardar", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
                 }
 
                 if (isEditing) {
@@ -182,14 +177,14 @@ fun BatchFormScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Icon(Icons.Default.Delete, "Eliminar")
+                        Icon(Icons.Default.Delete, stringResource(R.string.eliminar))
                         Spacer(Modifier.width(8.dp))
-                        Text("Eliminar Lote")
+                        Text(stringResource(R.string.eliminar_lote))
                     }
                     if (showDeleteConfirm) {
                         ConfirmDialog(
-                            title = "Eliminar Lote",
-                            message = "Esta accion no se puede deshacer.",
+                            title = stringResource(R.string.eliminar_lote),
+                            message = stringResource(R.string.accion_no_deshacer),
                             onConfirm = {
                                 viewModel.getById(batchId) { batch ->
                                     if (batch != null) viewModel.delete(batch) { onNavigateBack() }

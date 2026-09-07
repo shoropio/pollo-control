@@ -1,18 +1,21 @@
 package com.pollocontrol.app.ui.health
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.TreatmentEntity
+import com.pollocontrol.app.domain.repository.TreatmentRepository
+import com.pollocontrol.app.domain.repository.BatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HealthViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val repo = app.treatmentRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class HealthViewModel @Inject constructor(
+    private val treatmentRepository: TreatmentRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
     private val _batch = MutableStateFlow<BatchEntity?>(null)
     val batch: StateFlow<BatchEntity?> = _batch.asStateFlow()
@@ -22,21 +25,21 @@ class HealthViewModel(application: Application) : AndroidViewModel(application) 
 
     fun loadBatch(batchId: Long) {
         viewModelScope.launch {
-            _batch.value = batchRepo.getById(batchId)
-            repo.getByBatch(batchId).collect { _treatments.value = it }
+            _batch.value = batchRepository.getById(batchId)
+            treatmentRepository.getByBatch(batchId).collect { _treatments.value = it }
         }
     }
 
     fun save(treatment: TreatmentEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (treatment.id == 0L) repo.insert(treatment) else repo.update(treatment)
+            if (treatment.id == 0L) treatmentRepository.insert(treatment) else treatmentRepository.update(treatment)
             onSuccess()
         }
     }
 
     fun delete(treatment: TreatmentEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            repo.delete(treatment)
+            treatmentRepository.delete(treatment)
             onSuccess()
         }
     }

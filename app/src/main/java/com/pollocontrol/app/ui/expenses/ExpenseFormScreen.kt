@@ -13,29 +13,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 import java.text.SimpleDateFormat
 import java.util.*
 @Composable
 fun ExpenseFormScreen(
     gastoId: Long,
-    app: PolloControlApp,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: ExpensesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = ExpensesViewModel(app) as T
-        }
-    )
+    val viewModel: ExpensesViewModel = hiltViewModel()
     val isEditing = gastoId != 0L
     val batchMap by viewModel.batchMap.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
 
     var descripcion by remember { mutableStateOf("") }
     var tipo by remember { mutableStateOf("OTRO") }
@@ -66,7 +61,7 @@ fun ExpenseFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isEditing) "Editar Gasto" else "Nuevo Gasto") },
+                title = { Text(if (isEditing) stringResource(R.string.editar_gasto) else stringResource(R.string.nuevo_gasto)) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Atrás") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface, navigationIconContentColor = MaterialTheme.colorScheme.onSurface)
             )
@@ -77,34 +72,33 @@ fun ExpenseFormScreen(
         } else {
             Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-                OutlinedTextField(value = descripcion, onValueChange = { descripcion = it; descError = false }, label = { Text("Descripción *") }, isError = descError, modifier = Modifier.fillMaxWidth(), singleLine = true)
+                OutlinedTextField(value = descripcion, onValueChange = { descripcion = it; descError = false }, label = { Text(stringResource(R.string.descripcion_label)) }, isError = descError, modifier = Modifier.fillMaxWidth(), singleLine = true)
 
                 ExposedDropdownMenuBox(expanded = tipoExpanded, onExpandedChange = { tipoExpanded = !tipoExpanded }) {
-                    OutlinedTextField(value = tipo, onValueChange = {}, readOnly = true, label = { Text("Tipo") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(tipoExpanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
+                    OutlinedTextField(value = tipo, onValueChange = {}, readOnly = true, label = { Text(stringResource(R.string.tipo)) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(tipoExpanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
                     ExposedDropdownMenu(expanded = tipoExpanded, onDismissRequest = { tipoExpanded = false }) {
                         tipos.forEach { t -> DropdownMenuItem(text = { Text(t.lowercase().replaceFirstChar { it.uppercase() }) }, onClick = { tipo = t; tipoExpanded = false }) }
                     }
                 }
 
-                OutlinedTextField(value = monto, onValueChange = { monto = it; montoError = false }, label = { Text("Monto *") }, isError = montoError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
+                OutlinedTextField(value = monto, onValueChange = { monto = it; montoError = false }, label = { Text(stringResource(R.string.monto_label)) }, isError = montoError, modifier = Modifier.fillMaxWidth(), singleLine = true, prefix = { Text(currency.code) })
 
                 val dateStr = remember(fecha) { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(fecha)) }
-                OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text("Fecha") }, readOnly = true, modifier = Modifier.fillMaxWidth(), trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Fecha") } })
+                OutlinedTextField(value = dateStr, onValueChange = {}, label = { Text(stringResource(R.string.fecha_label)) }, readOnly = true, modifier = Modifier.fillMaxWidth(), trailingIcon = { IconButton(onClick = { showDatePicker = true }) { Icon(Icons.Default.DateRange, "Fecha") } })
 
-                // Lote selector (simplified - just a dropdown)
                 var loteExpanded by remember { mutableStateOf(false) }
                 var loteLabel by remember { mutableStateOf("General") }
                 ExposedDropdownMenuBox(expanded = loteExpanded, onExpandedChange = { loteExpanded = !loteExpanded }) {
-                    OutlinedTextField(value = loteLabel, onValueChange = {}, readOnly = true, label = { Text("Asignar a Lote") }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(loteExpanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
+                    OutlinedTextField(value = loteLabel, onValueChange = {}, readOnly = true, label = { Text(stringResource(R.string.asignar_lote)) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(loteExpanded) }, modifier = Modifier.fillMaxWidth().menuAnchor())
                     ExposedDropdownMenu(expanded = loteExpanded, onDismissRequest = { loteExpanded = false }) {
-                        DropdownMenuItem(text = { Text("General (sin lote)") }, onClick = { loteId = null; loteLabel = "General"; loteExpanded = false })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.general_sin_lote)) }, onClick = { loteId = null; loteLabel = "General"; loteExpanded = false })
                         batchMap.forEach { (id, name) ->
                             DropdownMenuItem(text = { Text(name) }, onClick = { loteId = id; loteLabel = name; loteExpanded = false })
                         }
                     }
                 }
 
-                OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text("Observaciones") }, modifier = Modifier.fillMaxWidth(), minLines = 2)
+                OutlinedTextField(value = observaciones, onValueChange = { observaciones = it }, label = { Text(stringResource(R.string.observaciones)) }, modifier = Modifier.fillMaxWidth(), minLines = 2)
 
                 Spacer(Modifier.height(8.dp))
                 Button(shape = androidx.compose.ui.graphics.RectangleShape, onClick = click@{
@@ -119,7 +113,7 @@ fun ExpenseFormScreen(
                         monto = monto.toDouble(), fecha = fecha, observaciones = observaciones
                     )) { onNavigateBack() }
                 }, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-                    Text("Guardar", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.guardar), fontWeight = FontWeight.Bold)
                 }
 
                 if (isEditing) {
@@ -130,21 +124,21 @@ fun ExpenseFormScreen(
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Icon(Icons.Default.Delete, "Eliminar")
+                        Icon(Icons.Default.Delete, stringResource(R.string.eliminar))
                         Spacer(Modifier.width(8.dp))
-                        Text("Eliminar", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.eliminar), fontWeight = FontWeight.Bold)
                     }
                     if (showDeleteConfirm) {
                         AlertDialog(
                             onDismissRequest = { showDeleteConfirm = false },
-                            title = { Text("Eliminar Gasto") },
-                            text = { Text("Esta accion no se puede deshacer.") },
+                            title = { Text(stringResource(R.string.eliminar_gasto)) },
+                            text = { Text(stringResource(R.string.accion_no_deshacer)) },
                             confirmButton = {
                                 TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = {
                                     viewModel.delete(ExpenseEntity(id = gastoId, loteId = null, tipo = "", descripcion = "", monto = 0.0, fecha = 0L, observaciones = "")) { onNavigateBack() }
-                                }) { Text("Eliminar", color = MaterialTheme.colorScheme.error) }
+                                }) { Text(stringResource(R.string.eliminar), color = MaterialTheme.colorScheme.error) }
                             },
-                            dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { showDeleteConfirm = false }) { Text("Cancelar") } }
+                            dismissButton = { TextButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { showDeleteConfirm = false }) { Text(stringResource(R.string.cancelar)) } }
                         )
                     }
                 }

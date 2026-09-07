@@ -23,28 +23,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.data.local.entity.SupplyEntity
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 
 @Composable
 fun InventoryScreen(
-    app: PolloControlApp,
     navController: NavHostController,
     onNavigateToForm: (Long) -> Unit
 ) {
-    val viewModel: InventoryViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = InventoryViewModel(app) as T
-        }
-    )
+    val viewModel: InventoryViewModel = hiltViewModel()
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
     val insumos by viewModel.filteredSupplies.collectAsState()
     val bajoStock by viewModel.lowStockSupplies.collectAsState()
     var filter by remember { mutableStateOf("TODOS") }
@@ -64,7 +59,7 @@ fun InventoryScreen(
         bottomBar = { PolloBottomNavBar(navController) },
         topBar = {
             TopAppBar(
-                title = { Text("Inventario") },
+                title = { Text(stringResource(R.string.inventario)) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
@@ -73,7 +68,7 @@ fun InventoryScreen(
         }
     ) { padding ->
         PullToSyncBox(
-            onSync = { app.firebaseSyncManager.syncAll() },
+            onSync = { firebaseSyncManager.syncAll() },
             modifier = Modifier.padding(padding)
         ) {
             Column(Modifier.fillMaxSize()) {
@@ -82,7 +77,7 @@ fun InventoryScreen(
                     Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Warning, "Alerta", tint = Color(0xFFEF6C00))
                         Spacer(Modifier.width(8.dp))
-                        Text("${bajoStock.size} insumos con stock bajo", fontWeight = FontWeight.Bold, color = Color(0xFFEF6C00))
+                        Text(stringResource(R.string.insumos_stock_bajo, bajoStock.size), fontWeight = FontWeight.Bold, color = Color(0xFFEF6C00))
                     }
                 }
             }
@@ -96,7 +91,7 @@ fun InventoryScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar por nombre, tipo o unidad...") },
+                placeholder = { Text(stringResource(R.string.buscar_inventario_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Search, "Buscar") },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
@@ -109,8 +104,8 @@ fun InventoryScreen(
 
             if (filteredAndSearched.isEmpty()) {
                 PolloEmptyState(
-                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay insumos registrados",
-                    subtitle = if (searchQuery.isNotBlank()) "Intente con otros terminos" else "Agregue un insumo usando el boton +"
+                    title = if (searchQuery.isNotBlank()) stringResource(R.string.sin_resultados) else stringResource(R.string.no_hay_insumos),
+                    subtitle = if (searchQuery.isNotBlank()) stringResource(R.string.intente_otros_terminos) else stringResource(R.string.agregue_insumo_boton)
                 )
             } else {
                 LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -133,8 +128,8 @@ private fun InsumoCard(insumo: SupplyEntity, onClick: () -> Unit) {
                 Text(insumo.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text(insumo.tipo.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(4.dp))
-                Text("Stock: ${insumo.stockActual} ${insumo.unidad}", style = MaterialTheme.typography.bodyMedium)
-                Text("Minimo: ${insumo.stockMinimo} ${insumo.unidad}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.stock_formato, insumo.stockActual.toString(), insumo.unidad), style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.minimo_formato, insumo.stockMinimo.toString(), insumo.unidad), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             if (isLow) {
                 Icon(Icons.Default.Warning, "Stock bajo", tint = Color(0xFFEF6C00))

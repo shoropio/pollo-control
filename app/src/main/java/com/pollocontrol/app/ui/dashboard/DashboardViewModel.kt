@@ -1,9 +1,8 @@
 package com.pollocontrol.app.ui.dashboard
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.data.cache.AppDataCache
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
 import com.pollocontrol.app.data.local.entity.FeedingEntity
@@ -12,6 +11,7 @@ import com.pollocontrol.app.data.local.entity.SaleEntity
 import com.pollocontrol.app.data.local.entity.SupplyEntity
 import com.pollocontrol.app.data.local.entity.WeighingEntity
 import com.pollocontrol.app.domain.model.DashboardStats
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,9 +20,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import javax.inject.Inject
 
-class DashboardViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
+    private val dataCache: AppDataCache
+) : ViewModel() {
 
     private val _stats = MutableStateFlow(DashboardStats())
     val stats: StateFlow<DashboardStats> = _stats.asStateFlow()
@@ -34,13 +37,13 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             @Suppress("UNCHECKED_CAST")
             combine(
-                app.dataCache.batches,
-                app.dataCache.mortalities,
-                app.dataCache.expenses,
-                app.dataCache.feedings,
-                app.dataCache.weighings,
-                app.dataCache.sales,
-                app.dataCache.supplies
+                dataCache.batches,
+                dataCache.mortalities,
+                dataCache.expenses,
+                dataCache.feedings,
+                dataCache.weighings,
+                dataCache.sales,
+                dataCache.supplies
             ) { values ->
                 buildStats(
                     batches = values[0] as List<BatchEntity>,
@@ -63,13 +66,13 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     fun loadDashboard(forceRefresh: Boolean = false) {
         if (forceRefresh) {
             _stats.value = buildStats(
-                batches = app.dataCache.batches.value,
-                mortalities = app.dataCache.mortalities.value,
-                expenses = app.dataCache.expenses.value,
-                feedings = app.dataCache.feedings.value,
-                weighings = app.dataCache.weighings.value,
-                sales = app.dataCache.sales.value,
-                supplies = app.dataCache.supplies.value
+                batches = dataCache.batches.value,
+                mortalities = dataCache.mortalities.value,
+                expenses = dataCache.expenses.value,
+                feedings = dataCache.feedings.value,
+                weighings = dataCache.weighings.value,
+                sales = dataCache.sales.value,
+                supplies = dataCache.supplies.value
             )
             _isLoading.value = false
         }

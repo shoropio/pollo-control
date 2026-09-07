@@ -1,19 +1,22 @@
 package com.pollocontrol.app.ui.expenses
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
+import com.pollocontrol.app.domain.repository.ExpenseRepository
+import com.pollocontrol.app.domain.repository.BatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ExpensesViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val repo = app.expenseRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class ExpensesViewModel @Inject constructor(
+    private val expenseRepository: ExpenseRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
-    val expenses: StateFlow<List<ExpenseEntity>> = repo.getAll()
+    val expenses: StateFlow<List<ExpenseEntity>> = expenseRepository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _totalExpenses = MutableStateFlow(0.0)
@@ -24,12 +27,12 @@ class ExpensesViewModel(application: Application) : AndroidViewModel(application
 
     init {
         viewModelScope.launch {
-            repo.getAll().collect { list ->
+            expenseRepository.getAll().collect { list ->
                 _totalExpenses.value = list.sumOf { it.monto }
             }
         }
         viewModelScope.launch {
-            batchRepo.getAll().collect { batches ->
+            batchRepository.getAll().collect { batches ->
                 _batchMap.value = batches.associate { it.id to it.nombre }
             }
         }
@@ -37,20 +40,20 @@ class ExpensesViewModel(application: Application) : AndroidViewModel(application
 
     fun getById(id: Long, onResult: (ExpenseEntity?) -> Unit) {
         viewModelScope.launch {
-            onResult(repo.getAll().first().find { it.id == id })
+            onResult(expenseRepository.getAll().first().find { it.id == id })
         }
     }
 
     fun save(expense: ExpenseEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (expense.id == 0L) repo.insert(expense) else repo.update(expense)
+            if (expense.id == 0L) expenseRepository.insert(expense) else expenseRepository.update(expense)
             onSuccess()
         }
     }
 
     fun delete(expense: ExpenseEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            repo.delete(expense)
+            expenseRepository.delete(expense)
             onSuccess()
         }
     }

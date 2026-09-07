@@ -16,13 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pollocontrol.app.PolloControlApp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.pollocontrol.app.data.local.entity.TreatmentEntity
 import com.pollocontrol.app.data.settings.AppCurrency
 import com.pollocontrol.app.ui.components.ConfirmDialog
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloDatePickerDialog
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.settings.formatMoney
@@ -32,15 +30,9 @@ import java.util.*
 @Composable
 fun HealthScreen(
     batchId: Long,
-    app: PolloControlApp,
     onNavigateBack: () -> Unit
 ) {
-    val viewModel: HealthViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = HealthViewModel(app) as T
-        }
-    )
+    val viewModel: HealthViewModel = hiltViewModel()
 
     LaunchedEffect(batchId) {
         viewModel.loadBatch(batchId)
@@ -48,7 +40,8 @@ fun HealthScreen(
 
     val lote by viewModel.batch.collectAsState()
     val treatments by viewModel.treatments.collectAsState()
-    val currency by app.settingsManager.currency.collectAsState()
+    val settingsManager = LocalAppDependencies.current.settingsManager
+    val currency by settingsManager.currency.collectAsState()
     var editingRecord by remember { mutableStateOf<TreatmentEntity?>(null) }
     var showDeleteConfirm by remember { mutableStateOf<TreatmentEntity?>(null) }
     var searchQuery by remember { mutableStateOf("") }

@@ -40,10 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.EggProductionEntity
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.components.PullToSyncBox
@@ -55,15 +56,16 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EggProductionScreen(
-    app: PolloControlApp,
     navController: NavHostController
 ) {
+    val viewModel: EggProductionViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
-    val allBatches by app.batchRepository.getAll().collectAsState(initial = emptyList())
+    val allBatches by viewModel.allBatches.collectAsState(initial = emptyList())
     val batches = remember(allBatches) {
         allBatches.filter { it.proposito == "HUEVOS" && (it.especie == "GALLINA" || it.especie == "CODORNIZ") }
     }
-    val allEggs by app.eggProductionRepository.getAll().collectAsState(initial = emptyList())
+    val allEggs by viewModel.allEggs.collectAsState(initial = emptyList())
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
     var selectedBatchId by remember { mutableLongStateOf(0L) }
     var showDialog by remember { mutableStateOf(false) }
 
@@ -99,7 +101,7 @@ fun EggProductionScreen(
         }
     ) { padding ->
         PullToSyncBox(
-            onSync = { app.firebaseSyncManager.syncAll() },
+            onSync = { firebaseSyncManager.syncAll() },
             modifier = Modifier.padding(padding)
         ) {
             Column(Modifier.fillMaxSize()) {
@@ -158,7 +160,7 @@ fun EggProductionScreen(
                                 item = item,
                                 batchName = batchNames[item.loteId].orEmpty(),
                                 onDelete = {
-                                    scope.launch { app.eggProductionRepository.delete(item) }
+                                    scope.launch { viewModel.deleteEgg(item) }
                                 }
                             )
                         }
@@ -174,7 +176,7 @@ fun EggProductionScreen(
             selectedBatchId = selectedBatchId,
             onDismiss = { showDialog = false },
             onSave = { item ->
-                scope.launch { app.eggProductionRepository.insert(item) }
+                scope.launch { viewModel.insertEgg(item) }
                 selectedBatchId = item.loteId
                 showDialog = false
             }

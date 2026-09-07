@@ -5,11 +5,12 @@
 
 package com.pollocontrol.app.ui.reports
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.data.cache.AppDataCache
+import com.pollocontrol.app.data.settings.SettingsManager
 import com.pollocontrol.app.domain.model.BatchReport
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,9 +20,13 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
 
-class ReportsViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
+@HiltViewModel
+class ReportsViewModel @Inject constructor(
+    private val appDataCache: AppDataCache,
+    private val settingsManager: SettingsManager
+) : ViewModel() {
 
     private val _reports = MutableStateFlow<List<BatchReport>>(emptyList())
     val reports: StateFlow<List<BatchReport>> = _reports.asStateFlow()
@@ -45,12 +50,12 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun buildReportsFromCache(): List<BatchReport> {
-        val batches = app.dataCache.batches.value
-        val mortalities = app.dataCache.mortalities.value
-        val feedings = app.dataCache.feedings.value
-        val expenses = app.dataCache.expenses.value
-        val weighings = app.dataCache.weighings.value
-        val sales = app.dataCache.sales.value
+        val batches = appDataCache.batches.value
+        val mortalities = appDataCache.mortalities.value
+        val feedings = appDataCache.feedings.value
+        val expenses = appDataCache.expenses.value
+        val weighings = appDataCache.weighings.value
+        val sales = appDataCache.sales.value
         val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val now = System.currentTimeMillis()
 
@@ -99,10 +104,10 @@ class ReportsViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun getCsvContent(): String {
-        return ReportExporter.exportToCsv(_reports.value, app.settingsManager.currency.value)
+        return ReportExporter.exportToCsv(_reports.value, settingsManager.currency.value)
     }
 
     fun getPdfContent(): ByteArray {
-        return ReportExporter.exportToPdf(_reports.value, app.settingsManager.currency.value)
+        return ReportExporter.exportToPdf(_reports.value, settingsManager.currency.value)
     }
 }

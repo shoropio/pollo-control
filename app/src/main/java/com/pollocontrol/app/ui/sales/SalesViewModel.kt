@@ -1,28 +1,32 @@
 package com.pollocontrol.app.ui.sales
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.SaleEntity
 import com.pollocontrol.app.data.local.entity.ClientEntity
 import com.pollocontrol.app.data.local.entity.BatchEntity
+import com.pollocontrol.app.domain.repository.SaleRepository
+import com.pollocontrol.app.domain.repository.ClientRepository
+import com.pollocontrol.app.domain.repository.BatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SalesViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val saleRepo = app.saleRepository
-    private val clientRepo = app.clientRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class SalesViewModel @Inject constructor(
+    private val saleRepository: SaleRepository,
+    private val clientRepository: ClientRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
-    val sales: StateFlow<List<SaleEntity>> = saleRepo.getAll()
+    val sales: StateFlow<List<SaleEntity>> = saleRepository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val clients: StateFlow<List<ClientEntity>> = clientRepo.getAll()
+    val clients: StateFlow<List<ClientEntity>> = clientRepository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val batches: StateFlow<List<BatchEntity>> = batchRepo.getAll()
+    val batches: StateFlow<List<BatchEntity>> = batchRepository.getAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val totalSales: StateFlow<Double> = sales
@@ -31,17 +35,17 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getById(id: Long, onResult: (SaleEntity?) -> Unit) {
         viewModelScope.launch {
-            onResult(saleRepo.getAll().first().find { it.id == id })
+            onResult(saleRepository.getAll().first().find { it.id == id })
         }
     }
 
     fun save(sale: SaleEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (sale.id == 0L) saleRepo.insert(sale) else saleRepo.update(sale)
+            if (sale.id == 0L) saleRepository.insert(sale) else saleRepository.update(sale)
             if (sale.clienteId != null && (sale.estadoPago == "CREDITO" || sale.estadoPago == "PENDIENTE")) {
-                val client = clientRepo.getById(sale.clienteId)
+                val client = clientRepository.getById(sale.clienteId)
                 if (client != null) {
-                    clientRepo.update(client.copy(saldoPendiente = client.saldoPendiente + sale.total))
+                    clientRepository.update(client.copy(saldoPendiente = client.saldoPendiente + sale.total))
                 }
             }
             onSuccess()
@@ -50,7 +54,7 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
     fun delete(sale: SaleEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            saleRepo.delete(sale)
+            saleRepository.delete(sale)
             onSuccess()
         }
     }

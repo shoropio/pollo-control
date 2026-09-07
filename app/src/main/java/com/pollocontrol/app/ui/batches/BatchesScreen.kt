@@ -23,31 +23,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.ui.components.LocalAppDependencies
 import com.pollocontrol.app.ui.components.PolloBottomNavBar
 import com.pollocontrol.app.ui.components.PolloEmptyState
 import com.pollocontrol.app.ui.components.PullToSyncBox
 import com.pollocontrol.app.data.local.entity.BatchEntity
+import androidx.compose.ui.res.stringResource
+import com.pollocontrol.app.R
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun BatchesScreen(
-    app: PolloControlApp,
     navController: NavHostController,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToForm: (Long) -> Unit
 ) {
-    val viewModel: BatchViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T = BatchViewModel(app) as T
-        }
-    )
+    val viewModel: BatchViewModel = hiltViewModel()
+    val firebaseSyncManager = LocalAppDependencies.current.firebaseSyncManager
     val batches by viewModel.filteredBatches.collectAsState()
     var filter by remember { mutableStateOf("TODOS") }
     var searchQuery by remember { mutableStateOf("") }
@@ -67,18 +62,18 @@ fun BatchesScreen(
         bottomBar = { PolloBottomNavBar(navController) },
         topBar = {
             TopAppBar(
-                title = { Text("Lotes") },
+                title = { Text(stringResource(R.string.lotes)) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surface, titleContentColor = MaterialTheme.colorScheme.onSurface)
             )
         },
         floatingActionButton = {
             FloatingActionButton(shape = androidx.compose.ui.graphics.RectangleShape, onClick = { onNavigateToForm(0L) }) {
-                Icon(Icons.Default.Add, "Agregar Lote")
+                Icon(Icons.Default.Add, stringResource(R.string.agregar_lote))
             }
         }
     ) { padding ->
         PullToSyncBox(
-            onSync = { app.firebaseSyncManager.syncAll() },
+            onSync = { firebaseSyncManager.syncAll() },
             modifier = Modifier.padding(padding)
         ) {
             Column(Modifier.fillMaxSize()) {
@@ -98,7 +93,7 @@ fun BatchesScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar por nombre, tipo, raza o galpon...") },
+                placeholder = { Text(stringResource(R.string.buscar_lotes_placeholder)) },
                 leadingIcon = { Icon(Icons.Default.Search, "Buscar") },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
@@ -111,8 +106,8 @@ fun BatchesScreen(
 
             if (filteredAndSearched.isEmpty()) {
                 PolloEmptyState(
-                    title = if (searchQuery.isNotBlank()) "Sin resultados" else "No hay lotes registrados",
-                    subtitle = if (searchQuery.isNotBlank()) "Intente con otros terminos" else "Agregue un lote usando el boton +"
+                    title = if (searchQuery.isNotBlank()) stringResource(R.string.sin_resultados) else stringResource(R.string.no_hay_lotes),
+                    subtitle = if (searchQuery.isNotBlank()) stringResource(R.string.intente_otros_terminos) else stringResource(R.string.agregue_lote_boton)
                 )
             } else {
                 LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -164,14 +159,14 @@ private fun BatchCard(batch: BatchEntity, onClick: () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                InfoItem("Edad", "$edad dias")
-                InfoItem("Aves", "${batch.cantidadInicial}")
-                InfoItem("Galpon", batch.galpon.ifBlank { "-" })
+                InfoItem(stringResource(R.string.edad), stringResource(R.string.edad_dias_formato, edad))
+                InfoItem(stringResource(R.string.aves_card), "${batch.cantidadInicial}")
+                InfoItem(stringResource(R.string.galpon_card), batch.galpon.ifBlank { "-" })
             }
             Spacer(Modifier.height(4.dp))
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                InfoItem("Raza", batch.raza.ifBlank { "-" })
-                InfoItem("Ingreso", date)
+                InfoItem(stringResource(R.string.raza_card), batch.raza.ifBlank { "-" })
+                InfoItem(stringResource(R.string.ingreso_card), date)
             }
         }
     }

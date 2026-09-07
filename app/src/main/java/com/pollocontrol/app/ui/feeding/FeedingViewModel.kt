@@ -5,20 +5,23 @@
 
 package com.pollocontrol.app.ui.feeding
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pollocontrol.app.PolloControlApp
 import com.pollocontrol.app.data.local.entity.FeedingEntity
 import com.pollocontrol.app.data.local.entity.BatchEntity
+import com.pollocontrol.app.domain.repository.FeedingRepository
+import com.pollocontrol.app.domain.repository.BatchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FeedingViewModel(application: Application) : AndroidViewModel(application) {
-    private val app = application as PolloControlApp
-    private val repo = app.feedingRepository
-    private val batchRepo = app.batchRepository
+@HiltViewModel
+class FeedingViewModel @Inject constructor(
+    private val feedingRepository: FeedingRepository,
+    private val batchRepository: BatchRepository
+) : ViewModel() {
 
     private val _batch = MutableStateFlow<BatchEntity?>(null)
     val batch: StateFlow<BatchEntity?> = _batch.asStateFlow()
@@ -31,12 +34,10 @@ class FeedingViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadBatch(batchId: Long) {
         viewModelScope.launch {
-            // ✅ Ejecutar todas las queries en paralelo de forma sincronizada
-            val batchDeferred = async { batchRepo.getById(batchId) }
-            val recordsDeferred = async { repo.getByBatch(batchId).first() }
-            val totalDeferred = async { repo.getTotalByBatch(batchId) }
+            val batchDeferred = async { batchRepository.getById(batchId) }
+            val recordsDeferred = async { feedingRepository.getByBatch(batchId).first() }
+            val totalDeferred = async { feedingRepository.getTotalByBatch(batchId) }
 
-            // Esperar todos los resultados
             _batch.value = batchDeferred.await()
             _records.value = recordsDeferred.await()
             _totalConsumption.value = totalDeferred.await()
@@ -45,14 +46,14 @@ class FeedingViewModel(application: Application) : AndroidViewModel(application)
 
     fun save(record: FeedingEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            if (record.id == 0L) repo.insert(record) else repo.update(record)
+            if (record.id == 0L) feedingRepository.insert(record) else feedingRepository.update(record)
             onSuccess()
         }
     }
 
     fun delete(record: FeedingEntity, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            repo.delete(record)
+            feedingRepository.delete(record)
             onSuccess()
         }
     }
