@@ -40,4 +40,103 @@
     <string name="confirmar_eliminar">¿Está seguro de eliminar?</string>
     <string name="si">Sí</string>
     <string name="no">No</string>
+
+    <!-- Dashboard -->
+    <string name="buenos_dias">Buenos dias</string>
+    <string name="resumen_general_granja">Resumen general de tu granja</string>
+    <string name="acceso_rapido">Acceso Rapido</string>
+    <string name="alertas_titulo">Alertas</string>
+    <string name="vivos">Vivos</string>
+    <string name="mort">Mort.</string>
+    <string name="ganancia">Ganancia</string>
+    <string name="insumos_stock_bajo">%d insumos con stock bajo</string>
+    <string name="mortalidad_formato">Mortalidad: %s%%</string>
+    <string name="pagos_pendientes">%d pagos pendientes</string>
+
+    <!-- Batches -->
+    <string name="buscar_lotes_placeholder">Buscar por nombre, tipo, raza o galpon…</string>
+    <string name="agregar_lote">Agregar Lote</string>
+    <string name="sin_resultados">Sin resultados</string>
+    <string name="no_hay_lotes">No hay lotes registrados</string>
+    <string name="intente_otros_terminos">Intente con otros terminos</string>
+    <string name="agregue_lote_boton">Agregue un lote usando el boton +</string>
+    <string name="edad">Edad</string>
+    <string name="aves_card">Aves</string>
+    <string name="galpon_card">Galpon</string>
+    <string name="raza_card">Raza</string>
+    <string name="ingreso_card">Ingreso</string>
+    <string name="edad_dias_formato">%d dias</string>
+
+    <!-- BatchDetail -->
+    <string name="detalle">Detalle</string>
+    <string name="tipo">Tipo</string>
+    <string name="galpon">Galpón</string>
+    <string name="proveedor">Proveedor</string>
+    <string name="fecha_ingreso">Fecha Ingreso</string>
+    <string name="estado">Estado</string>
+    <string name="produccion">Produccion</string>
+    <string name="aves_iniciales">Aves iniciales</string>
+    <string name="aves_vivas">Aves vivas</string>
+    <string name="costo_ave">Costo/Ave</string>
+    <string name="gestion_lote">Gestión del Lote</string>
+    <string name="mortalidad_descartes">Mortalidad y Descartes</string>
+    <string name="sanidad_medicamentos">Sanidad y Medicamentos</string>
+    <string name="pesajes_crecimiento">Pesajes y Crecimiento</string>
+    <string name="sacrificio_beneficiado">Sacrificio / Beneficiado</string>
+    <string name="observaciones">Observaciones</string>
+    <string name="edad_dias">%d días</string>
+
+    <!-- BatchForm -->
+    <string name="editar_lote">Editar Lote</string>
+    <string name="nuevo_lote">Nuevo Lote</string>
+    <string name="nombre_lote_label">Nombre del Lote *</string>
+    <string name="fecha_ingreso_label">Fecha de Ingreso</string>
+    <string name="tipo_lote_label">Tipo de lote</string>
+    <string name="cantidad_inicial_aves">Cantidad inicial de aves *</string>
+    <string name="precio_unitario_ave">Precio unitario por ave *</string>
+    <string name="raza_linea_genetica">Raza / Línea Genética</string>
+    <string name="galpon_ubicacion">Galpón / Ubicación</string>
+    <string name="campo_requerido">Campo requerido</string>
+    <string name="eliminar_lote">Eliminar Lote</string>
+    <string name="accion_no_deshacer">Esta accion no se puede deshacer.</string>
+
+    <!-- Inventory -->
+    <string name="buscar_inventario_placeholder">Buscar por nombre, tipo o unidad…</string>
+    <string name="no_hay_insumos">No hay insumos registrados</string>
+    <string name="agregue_insumo_boton">Agregue un insumo usando el boton +</string>
+    <string name="stock_formato" formatted="false">Stock: %s %s</string>
+    <string name="minimo_formato" formatted="false">Minimo: %s %s</string>
+
+    <!-- InventoryForm -->
+    <string name="editar_insumo">Editar Insumo</string>
+    <string name="nuevo_insumo">Nuevo Insumo</string>
+    <string name="nombre_label">Nombre *</string>
+    <string name="stock_actual_label">Stock Actual</string>
+    <string name="stock_minimo_label">Stock Mínimo</string>
+    <string name="unidad_label">Unidad (kg, sacos, lt, etc)</string>
+    <string name="eliminar_insumo">Eliminar Insumo</string>
+    <string name="movimiento_stock">Movimiento de Stock</string>
+    <string name="cantidad_label">Cantidad</string>
+    <string name="costo_solo_entrada">Costo (solo entrada)</string>
+    <string name="entrada">Entrada</string>
+    <string name="salida">Salida</string>
+
+    <!-- Expenses -->
+    <string name="total_gastos">Total Gastos</string>
+    <string name="registros_formato">%d registros</string>
+    <string name="buscar_gastos_placeholder">Buscar por descripcion o tipo…</string>
+    <string name="no_hay_gastos">No hay gastos registrados</string>
+    <string name="agregue_gasto_boton">Agregue un gasto usando el boton +</string>
+    <string name="lote_formato">Lote: %s</string>
+    <string name="gasto_general">Gasto General</string>
+
+    <!-- ExpenseForm -->
+    <string name="editar_gasto">Editar Gasto</string>
+    <string name="nuevo_gasto">Nuevo Gasto</string>
+    <string name="descripcion_label">Descripción *</string>
+    <string name="monto_label">Monto *</string>
+    <string name="fecha_label">Fecha</string>
+    <string name="asignar_lote">Asignar a Lote</string>
+    <string name="general_sin_lote">General (sin lote)</string>
+    <string name="eliminar_gasto">Eliminar Gasto</string>
 </resources>
