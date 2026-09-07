@@ -1,0 +1,1138 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 6,
+    "identityHash": "63f70b1145eede7f6bf802737b162b64",
+    "entities": [
+      {
+        "tableName": "lotes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `fechaIngreso` INTEGER NOT NULL, `cantidadInicial` INTEGER NOT NULL, `especie` TEXT NOT NULL, `proposito` TEXT NOT NULL, `precioPorPollito` REAL NOT NULL, `raza` TEXT NOT NULL, `galpon` TEXT NOT NULL, `proveedor` TEXT NOT NULL, `estado` TEXT NOT NULL, `observaciones` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaIngreso",
+            "columnName": "fechaIngreso",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidadInicial",
+            "columnName": "cantidadInicial",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "especie",
+            "columnName": "especie",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proposito",
+            "columnName": "proposito",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precioPorPollito",
+            "columnName": "precioPorPollito",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "raza",
+            "columnName": "raza",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "galpon",
+            "columnName": "galpon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proveedor",
+            "columnName": "proveedor",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_lotes_estado",
+            "unique": false,
+            "columnNames": [
+              "estado"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_lotes_estado` ON `${TABLE_NAME}` (`estado`)"
+          },
+          {
+            "name": "index_lotes_fechaIngreso",
+            "unique": false,
+            "columnNames": [
+              "fechaIngreso"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_lotes_fechaIngreso` ON `${TABLE_NAME}` (`fechaIngreso`)"
+          },
+          {
+            "name": "idx_batch_estado_fecha",
+            "unique": false,
+            "columnNames": [
+              "estado",
+              "fechaIngreso"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_batch_estado_fecha` ON `${TABLE_NAME}` (`estado`, `fechaIngreso`)"
+          }
+        ]
+      },
+      {
+        "tableName": "mortalidad",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `cantidad` INTEGER NOT NULL, `motivo` TEXT NOT NULL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidad",
+            "columnName": "cantidad",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "motivo",
+            "columnName": "motivo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_mortalidad_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_mortalidad_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "insumos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `tipo` TEXT NOT NULL, `stockActual` REAL NOT NULL, `stockMinimo` REAL NOT NULL, `unidad` TEXT NOT NULL, `observaciones` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stockActual",
+            "columnName": "stockActual",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stockMinimo",
+            "columnName": "stockMinimo",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unidad",
+            "columnName": "unidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_insumos_tipo",
+            "unique": false,
+            "columnNames": [
+              "tipo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_insumos_tipo` ON `${TABLE_NAME}` (`tipo`)"
+          },
+          {
+            "name": "index_insumos_nombre",
+            "unique": false,
+            "columnNames": [
+              "nombre"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_insumos_nombre` ON `${TABLE_NAME}` (`nombre`)"
+          }
+        ]
+      },
+      {
+        "tableName": "movimientos_insumo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `insumoId` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `cantidad` REAL NOT NULL, `fecha` INTEGER NOT NULL, `costo` REAL, `loteId` INTEGER, `observaciones` TEXT NOT NULL, FOREIGN KEY(`insumoId`) REFERENCES `insumos`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "insumoId",
+            "columnName": "insumoId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidad",
+            "columnName": "cantidad",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "costo",
+            "columnName": "costo",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_movimientos_insumo_insumoId",
+            "unique": false,
+            "columnNames": [
+              "insumoId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_movimientos_insumo_insumoId` ON `${TABLE_NAME}` (`insumoId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "insumos",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "insumoId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "alimentacion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `cantidadKg` REAL NOT NULL, `cantidadSacos` INTEGER, `costo` REAL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidadKg",
+            "columnName": "cantidadKg",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidadSacos",
+            "columnName": "cantidadSacos",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "costo",
+            "columnName": "costo",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_alimentacion_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_alimentacion_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "gastos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER, `tipo` TEXT NOT NULL, `descripcion` TEXT NOT NULL, `monto` REAL NOT NULL, `fecha` INTEGER NOT NULL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descripcion",
+            "columnName": "descripcion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monto",
+            "columnName": "monto",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_gastos_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_gastos_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          },
+          {
+            "name": "index_gastos_fecha",
+            "unique": false,
+            "columnNames": [
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_gastos_fecha` ON `${TABLE_NAME}` (`fecha`)"
+          },
+          {
+            "name": "idx_expense_fecha_lote",
+            "unique": false,
+            "columnNames": [
+              "fecha",
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_expense_fecha_lote` ON `${TABLE_NAME}` (`fecha`, `loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tratamientos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `nombre` TEXT NOT NULL, `fechaAplicacion` INTEGER NOT NULL, `dosis` TEXT NOT NULL, `responsable` TEXT NOT NULL, `costo` REAL, `periodoRetiro` INTEGER, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaAplicacion",
+            "columnName": "fechaAplicacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dosis",
+            "columnName": "dosis",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responsable",
+            "columnName": "responsable",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "costo",
+            "columnName": "costo",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "periodoRetiro",
+            "columnName": "periodoRetiro",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tratamientos_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tratamientos_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pesajes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `edadLote` INTEGER NOT NULL, `cantidadAves` INTEGER NOT NULL, `pesoPromedio` REAL NOT NULL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "edadLote",
+            "columnName": "edadLote",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidadAves",
+            "columnName": "cantidadAves",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pesoPromedio",
+            "columnName": "pesoPromedio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pesajes_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pesajes_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "sacrificios",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `cantidad` INTEGER NOT NULL, `pesoVivoPromedio` REAL NOT NULL, `pesoCanalPromedio` REAL NOT NULL, `merma` REAL NOT NULL, `costoSacrificio` REAL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidad",
+            "columnName": "cantidad",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pesoVivoPromedio",
+            "columnName": "pesoVivoPromedio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pesoCanalPromedio",
+            "columnName": "pesoCanalPromedio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "merma",
+            "columnName": "merma",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "costoSacrificio",
+            "columnName": "costoSacrificio",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_sacrificios_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_sacrificios_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "ventas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER, `clienteId` INTEGER, `fecha` INTEGER NOT NULL, `tipo` TEXT NOT NULL, `modalidad` TEXT NOT NULL, `cantidad` REAL NOT NULL, `precioUnitario` REAL NOT NULL, `total` REAL NOT NULL, `metodoPago` TEXT NOT NULL, `estadoPago` TEXT NOT NULL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL , FOREIGN KEY(`clienteId`) REFERENCES `clientes`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "clienteId",
+            "columnName": "clienteId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipo",
+            "columnName": "tipo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modalidad",
+            "columnName": "modalidad",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidad",
+            "columnName": "cantidad",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "precioUnitario",
+            "columnName": "precioUnitario",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metodoPago",
+            "columnName": "metodoPago",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estadoPago",
+            "columnName": "estadoPago",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ventas_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ventas_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          },
+          {
+            "name": "index_ventas_clienteId",
+            "unique": false,
+            "columnNames": [
+              "clienteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ventas_clienteId` ON `${TABLE_NAME}` (`clienteId`)"
+          },
+          {
+            "name": "index_ventas_fecha",
+            "unique": false,
+            "columnNames": [
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ventas_fecha` ON `${TABLE_NAME}` (`fecha`)"
+          },
+          {
+            "name": "idx_sale_fecha_lote",
+            "unique": false,
+            "columnNames": [
+              "fecha",
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_sale_fecha_lote` ON `${TABLE_NAME}` (`fecha`, `loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "clientes",
+            "onDelete": "SET NULL",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "clienteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "clientes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nombre` TEXT NOT NULL, `telefono` TEXT NOT NULL, `direccion` TEXT NOT NULL, `saldoPendiente` REAL NOT NULL, `observaciones` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nombre",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "telefono",
+            "columnName": "telefono",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "direccion",
+            "columnName": "direccion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saldoPendiente",
+            "columnName": "saldoPendiente",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_clientes_nombre",
+            "unique": false,
+            "columnNames": [
+              "nombre"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_clientes_nombre` ON `${TABLE_NAME}` (`nombre`)"
+          }
+        ]
+      },
+      {
+        "tableName": "sync_tombstones",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`collectionName` TEXT NOT NULL, `documentId` INTEGER NOT NULL, `deletedAt` INTEGER NOT NULL, PRIMARY KEY(`collectionName`, `documentId`))",
+        "fields": [
+          {
+            "fieldPath": "collectionName",
+            "columnName": "collectionName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "documentId",
+            "columnName": "documentId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deletedAt",
+            "columnName": "deletedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "collectionName",
+            "documentId"
+          ]
+        }
+      },
+      {
+        "tableName": "produccion_huevos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `loteId` INTEGER NOT NULL, `fecha` INTEGER NOT NULL, `cantidadHuevos` INTEGER NOT NULL, `pesoPromedio` REAL NOT NULL, `calidadA` INTEGER NOT NULL, `calidadB` INTEGER NOT NULL, `rechazos` INTEGER NOT NULL, `observaciones` TEXT NOT NULL, FOREIGN KEY(`loteId`) REFERENCES `lotes`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "loteId",
+            "columnName": "loteId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cantidadHuevos",
+            "columnName": "cantidadHuevos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pesoPromedio",
+            "columnName": "pesoPromedio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calidadA",
+            "columnName": "calidadA",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calidadB",
+            "columnName": "calidadB",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rechazos",
+            "columnName": "rechazos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_produccion_huevos_loteId",
+            "unique": false,
+            "columnNames": [
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_produccion_huevos_loteId` ON `${TABLE_NAME}` (`loteId`)"
+          },
+          {
+            "name": "index_produccion_huevos_fecha",
+            "unique": false,
+            "columnNames": [
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_produccion_huevos_fecha` ON `${TABLE_NAME}` (`fecha`)"
+          },
+          {
+            "name": "idx_eggs_fecha_lote",
+            "unique": false,
+            "columnNames": [
+              "fecha",
+              "loteId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_eggs_fecha_lote` ON `${TABLE_NAME}` (`fecha`, `loteId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "lotes",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "loteId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '63f70b1145eede7f6bf802737b162b64')"
+    ]
+  }
+}
