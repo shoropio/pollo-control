@@ -30,11 +30,10 @@ import com.pollocontrol.app.data.local.entity.*
         SaleEntity::class,
         ClientEntity::class,
         SyncTombstoneEntity::class,
-        QuailBatchEntity::class,
         EggProductionEntity::class
     ],
-    version = 5,
-    exportSchema = false
+    version = 6,
+    exportSchema = true
 )
 @TypeConverters(DateConverter::class)
 abstract class PolloControlDatabase : RoomDatabase() {
@@ -50,7 +49,6 @@ abstract class PolloControlDatabase : RoomDatabase() {
     abstract fun saleDao(): SaleDao
     abstract fun clientDao(): ClientDao
     abstract fun syncTombstoneDao(): SyncTombstoneDao
-    abstract fun quailBatchDao(): QuailBatchDao
     abstract fun eggProductionDao(): EggProductionDao
 
     companion object {
@@ -63,7 +61,7 @@ abstract class PolloControlDatabase : RoomDatabase() {
                     context.applicationContext,
                     PolloControlDatabase::class.java,
                     "pollocontrol_database"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build()
                 INSTANCE = instance
                 instance
             }
@@ -187,6 +185,13 @@ abstract class PolloControlDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_produccion_huevos_loteId ON produccion_huevos (loteId)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_produccion_huevos_fecha ON produccion_huevos (fecha)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS idx_eggs_fecha_lote ON produccion_huevos (fecha, loteId)")
+            }
+        }
+
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE IF EXISTS lotes_codornices")
+                db.execSQL("DELETE FROM sync_tombstones WHERE collectionName = 'lotes_codornices'")
             }
         }
     }
