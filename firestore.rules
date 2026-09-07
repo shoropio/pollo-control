@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Authentication - only authenticated users
+    allow read, write: if request.auth != null;
+    
+    // Batches collection - users can only access their own batches
+    match /batches/{batchId} {
+      allow read, write: if request.auth != null;
+      
+      // Subcollections for batch data
+      match /produccion_huevos/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /alimentaciones/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /gastos/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /ventas/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /clientes/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /mortality/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+      
+      match /pagos/{docId} {
+        allow read, write: if request.auth != null && 
+          get(/databases/$(database)/documents/batches/$(batchId)).data.usuarioId == request.auth.uid;
+      }
+    }
+    
+    // Species options are read-only configuration
+    match /__system__/especies/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Users collection - manage own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
