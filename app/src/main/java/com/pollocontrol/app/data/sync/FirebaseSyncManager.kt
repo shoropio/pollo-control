@@ -12,14 +12,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.gson.Gson
-import com.pollocontrol.app.PolloControlApp
+import com.pollocontrol.app.data.local.PolloControlDatabase
 import com.pollocontrol.app.data.local.entity.BatchEntity
 import com.pollocontrol.app.data.local.entity.ClientEntity
 import com.pollocontrol.app.data.local.entity.EggProductionEntity
 import com.pollocontrol.app.data.local.entity.ExpenseEntity
 import com.pollocontrol.app.data.local.entity.FeedingEntity
 import com.pollocontrol.app.data.local.entity.MortalityEntity
-import com.pollocontrol.app.data.local.entity.QuailBatchEntity
 import com.pollocontrol.app.data.local.entity.SaleEntity
 import com.pollocontrol.app.data.local.entity.SlaughterEntity
 import com.pollocontrol.app.data.local.entity.SupplyEntity
@@ -34,6 +33,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
+import javax.inject.Singleton
+import dagger.hilt.android.qualifiers.ApplicationContext
 
 enum class SyncStatus {
     PENDING, SYNCING, SYNCED, ERROR, NOT_CONFIGURED
@@ -44,10 +46,11 @@ data class SyncResult(
     val message: String = ""
 )
 
-class FirebaseSyncManager(private val context: Context) {
-
-    private val app: PolloControlApp
-        get() = context.applicationContext as PolloControlApp
+@Singleton
+class FirebaseSyncManager @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val database: PolloControlDatabase
+) {
 
     private val gson = Gson()
 
@@ -91,11 +94,11 @@ class FirebaseSyncManager(private val context: Context) {
 
             val remoteDeletes = downloadTombstones(userDoc)
             remoteDeletes.forEach { tombstone ->
-                app.database.syncTombstoneDao().insert(tombstone)
+                database.syncTombstoneDao().insert(tombstone)
                 applyLocalDelete(tombstone)
             }
 
-            val localDeletes = app.database.syncTombstoneDao().getAll().first()
+            val localDeletes = database.syncTombstoneDao().getAll().first()
             uploaded += uploadTombstones(userDoc, localDeletes)
             localDeletes.forEach { tombstone ->
                 userDoc.collection(tombstone.collectionName)
@@ -105,33 +108,31 @@ class FirebaseSyncManager(private val context: Context) {
                 deleteRelatedRemoteDocuments(userDoc, tombstone)
             }
 
-            uploaded += uploadCollection(userDoc, SyncCollections.BATCHES, app.database.batchDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.CLIENTS, app.database.clientDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.SUPPLIES, app.database.supplyDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.SUPPLY_MOVEMENTS, app.database.supplyMovementDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.EXPENSES, app.database.expenseDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.FEEDING, app.database.feedingDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.MORTALITY, app.database.mortalityDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.TREATMENTS, app.database.treatmentDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.WEIGHING, app.database.weighingDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.SLAUGHTER, app.database.slaughterDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.SALES, app.database.saleDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.QUAIL_BATCHES, app.database.quailBatchDao().getAll().first())
-            uploaded += uploadCollection(userDoc, SyncCollections.EGG_PRODUCTION, app.database.eggProductionDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.BATCHES, database.batchDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.CLIENTS, database.clientDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.SUPPLIES, database.supplyDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.SUPPLY_MOVEMENTS, database.supplyMovementDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.EXPENSES, database.expenseDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.FEEDING, database.feedingDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.MORTALITY, database.mortalityDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.TREATMENTS, database.treatmentDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.WEIGHING, database.weighingDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.SLAUGHTER, database.slaughterDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.SALES, database.saleDao().getAll().first())
+            uploaded += uploadCollection(userDoc, SyncCollections.EGG_PRODUCTION, database.eggProductionDao().getAll().first())
 
-            downloaded += downloadCollection(userDoc, SyncCollections.BATCHES, BatchEntity::class.java, app.database.batchDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.CLIENTS, ClientEntity::class.java, app.database.clientDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.SUPPLIES, SupplyEntity::class.java, app.database.supplyDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.SUPPLY_MOVEMENTS, SupplyMovementEntity::class.java, app.database.supplyMovementDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.EXPENSES, ExpenseEntity::class.java, app.database.expenseDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.FEEDING, FeedingEntity::class.java, app.database.feedingDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.MORTALITY, MortalityEntity::class.java, app.database.mortalityDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.TREATMENTS, TreatmentEntity::class.java, app.database.treatmentDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.WEIGHING, WeighingEntity::class.java, app.database.weighingDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.SLAUGHTER, SlaughterEntity::class.java, app.database.slaughterDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.SALES, SaleEntity::class.java, app.database.saleDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.QUAIL_BATCHES, QuailBatchEntity::class.java, app.database.quailBatchDao()::insert)
-            downloaded += downloadCollection(userDoc, SyncCollections.EGG_PRODUCTION, EggProductionEntity::class.java, app.database.eggProductionDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.BATCHES, BatchEntity::class.java, database.batchDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.CLIENTS, ClientEntity::class.java, database.clientDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.SUPPLIES, SupplyEntity::class.java, database.supplyDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.SUPPLY_MOVEMENTS, SupplyMovementEntity::class.java, database.supplyMovementDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.EXPENSES, ExpenseEntity::class.java, database.expenseDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.FEEDING, FeedingEntity::class.java, database.feedingDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.MORTALITY, MortalityEntity::class.java, database.mortalityDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.TREATMENTS, TreatmentEntity::class.java, database.treatmentDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.WEIGHING, WeighingEntity::class.java, database.weighingDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.SLAUGHTER, SlaughterEntity::class.java, database.slaughterDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.SALES, SaleEntity::class.java, database.saleDao()::insert)
+            downloaded += downloadCollection(userDoc, SyncCollections.EGG_PRODUCTION, EggProductionEntity::class.java, database.eggProductionDao()::insert)
 
             publishResult(
                 SyncStatus.SYNCED,
@@ -164,40 +165,6 @@ class FirebaseSyncManager(private val context: Context) {
             batch.commit().await()
         }
         return payloads.size
-    }
-
-    // ✅ Método auxiliar para paginar queries sin cargar todo en memoria
-    private suspend inline fun <T : Any> uploadCollectionPaginated(
-        userDoc: com.google.firebase.firestore.DocumentReference,
-        collectionName: String,
-        daoQuery: suspend (limit: Int, offset: Int) -> List<T>,
-        pageSize: Int = 1000
-    ): Int {
-        var offset = 0
-        var totalUploaded = 0
-        var currentPage: List<T>
-
-        do {
-            currentPage = daoQuery(pageSize, offset)
-            if (currentPage.isNotEmpty()) {
-                val payloads = currentPage.mapNotNull { record ->
-                    val data = (record as Any).toFirestoreMap()
-                    val id = data["id"]?.asLongString() ?: return@mapNotNull null
-                    id to data
-                }
-                payloads.chunked(FIRESTORE_BATCH_LIMIT).forEach { chunk ->
-                    val batch = FirebaseFirestore.getInstance().batch()
-                    chunk.forEach { (id, data) ->
-                        batch.set(userDoc.collection(collectionName).document(id), data, SetOptions.merge())
-                    }
-                    batch.commit().await()
-                }
-                totalUploaded += payloads.size
-                offset += pageSize
-            }
-        } while (currentPage.size == pageSize)
-
-        return totalUploaded
     }
 
     private suspend fun uploadTombstones(
@@ -236,19 +203,18 @@ class FirebaseSyncManager(private val context: Context) {
 
     private suspend fun applyLocalDelete(tombstone: SyncTombstoneEntity) {
         when (tombstone.collectionName) {
-            SyncCollections.BATCHES -> app.database.batchDao().deleteById(tombstone.documentId)
-            SyncCollections.CLIENTS -> app.database.clientDao().deleteById(tombstone.documentId)
-            SyncCollections.SUPPLIES -> app.database.supplyDao().deleteById(tombstone.documentId)
-            SyncCollections.SUPPLY_MOVEMENTS -> app.database.supplyMovementDao().deleteById(tombstone.documentId)
-            SyncCollections.EXPENSES -> app.database.expenseDao().deleteById(tombstone.documentId)
-            SyncCollections.FEEDING -> app.database.feedingDao().deleteById(tombstone.documentId)
-            SyncCollections.MORTALITY -> app.database.mortalityDao().deleteById(tombstone.documentId)
-            SyncCollections.TREATMENTS -> app.database.treatmentDao().deleteById(tombstone.documentId)
-            SyncCollections.WEIGHING -> app.database.weighingDao().deleteById(tombstone.documentId)
-            SyncCollections.SLAUGHTER -> app.database.slaughterDao().deleteById(tombstone.documentId)
-            SyncCollections.SALES -> app.database.saleDao().deleteById(tombstone.documentId)
-            SyncCollections.QUAIL_BATCHES -> app.database.quailBatchDao().deleteById(tombstone.documentId)
-            SyncCollections.EGG_PRODUCTION -> app.database.eggProductionDao().deleteById(tombstone.documentId)
+            SyncCollections.BATCHES -> database.batchDao().deleteById(tombstone.documentId)
+            SyncCollections.CLIENTS -> database.clientDao().deleteById(tombstone.documentId)
+            SyncCollections.SUPPLIES -> database.supplyDao().deleteById(tombstone.documentId)
+            SyncCollections.SUPPLY_MOVEMENTS -> database.supplyMovementDao().deleteById(tombstone.documentId)
+            SyncCollections.EXPENSES -> database.expenseDao().deleteById(tombstone.documentId)
+            SyncCollections.FEEDING -> database.feedingDao().deleteById(tombstone.documentId)
+            SyncCollections.MORTALITY -> database.mortalityDao().deleteById(tombstone.documentId)
+            SyncCollections.TREATMENTS -> database.treatmentDao().deleteById(tombstone.documentId)
+            SyncCollections.WEIGHING -> database.weighingDao().deleteById(tombstone.documentId)
+            SyncCollections.SLAUGHTER -> database.slaughterDao().deleteById(tombstone.documentId)
+            SyncCollections.SALES -> database.saleDao().deleteById(tombstone.documentId)
+            SyncCollections.EGG_PRODUCTION -> database.eggProductionDao().deleteById(tombstone.documentId)
         }
     }
 
@@ -267,9 +233,6 @@ class FirebaseSyncManager(private val context: Context) {
             }
             SyncCollections.SUPPLIES -> {
                 deleteRemoteWhere(userDoc, SyncCollections.SUPPLY_MOVEMENTS, "insumoId", tombstone.documentId)
-            }
-            SyncCollections.QUAIL_BATCHES -> {
-                deleteRemoteWhere(userDoc, SyncCollections.EGG_PRODUCTION, "loteId", tombstone.documentId)
             }
         }
     }
@@ -419,18 +382,6 @@ class FirebaseSyncManager(private val context: Context) {
             "total" to total,
             "metodoPago" to metodoPago,
             "estadoPago" to estadoPago,
-            "observaciones" to observaciones
-        )
-        is QuailBatchEntity -> mapOf(
-            "id" to id,
-            "nombre" to nombre,
-            "fechaIngreso" to fechaIngreso,
-            "cantidadInicial" to cantidadInicial,
-            "precioUnitario" to precioUnitario,
-            "raza" to raza,
-            "galpon" to galpon,
-            "proveedor" to proveedor,
-            "estado" to estado,
             "observaciones" to observaciones
         )
         is EggProductionEntity -> mapOf(
